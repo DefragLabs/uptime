@@ -3,7 +3,7 @@
 # Goals
 
 - Server uptime monitoring
-  - Frequency
+  - Frequency (seconds/minutes/hours/days)
   - url
   - http/https
   - headers
