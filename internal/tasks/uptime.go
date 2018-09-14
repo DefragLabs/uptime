@@ -9,11 +9,10 @@ import (
 	"github.com/dineshs91/uptime/internal/db"
 )
 
-// PingServer This function pings any server, and stores the status code.
+// PingServer function pings any server, and stores the status code.
 func PingServer() {
-	var frequence = time.Duration(100)
-	ticker := time.NewTicker(frequence)
-	stop := make(chan struct{})
+	var frequency = time.Duration(100)
+	ticker := time.Tick(frequency)
 
 	dbClient := db.GetDbClient()
 	collection := dbClient.Database("uptime").Collection("count")
@@ -21,7 +20,7 @@ func PingServer() {
 	go func() {
 		for {
 			select {
-			case t := <-ticker.C:
+			case t := <-ticker:
 				time.Sleep(10 * time.Second)
 				result := bson.NewDocument()
 				err := collection.FindOne(
@@ -40,7 +39,7 @@ func PingServer() {
 						bson.NewDocument(
 							bson.EC.SubDocumentFromElements(
 								"$set",
-								bson.EC.Time("time", time.Now()),
+								bson.EC.String("time", time.Now().Format(time.UnixDate)),
 							),
 						),
 					)
@@ -49,13 +48,10 @@ func PingServer() {
 						context.Background(),
 						bson.NewDocument(
 							bson.EC.String("uptime", "test"),
-							bson.EC.Time("time", t),
+							bson.EC.String("time", t.Format(time.UnixDate)),
 						),
 					)
 				}
-			case <-stop:
-				ticker.Stop()
-				return
 			}
 		}
 	}()

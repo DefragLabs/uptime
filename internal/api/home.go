@@ -20,7 +20,8 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 	filter := bson.NewDocument(bson.EC.String("uptime", "test"))
 	collection.FindOne(context.Background(), filter).Decode(result)
 
-	fmt.Fprintf(w, "Result: %v\n", result)
+	timeResult := result.LookupElement("time")
+	fmt.Fprintf(w, "Result: %s\n", timeResult.Value().StringValue())
 }
 
 // PingHandler - handler for ping path
