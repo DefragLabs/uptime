@@ -22,7 +22,7 @@ func PingServer() {
 		for {
 			select {
 			case t := <-ticker.C:
-				// time.Sleep(10 * time.Second)
+				time.Sleep(10 * time.Second)
 				result := bson.NewDocument()
 				err := collection.FindOne(
 					context.Background(),
