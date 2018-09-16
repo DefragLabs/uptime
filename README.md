@@ -12,8 +12,11 @@ Api's internal, but if required should be done easily.
 
 Api's
 ## Auth
+- Register
 - Login
 - Logout
+- Forgot password
+- Change password
 
 ## Uptime monitoring
 - Add monitoring url. 
