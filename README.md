@@ -9,3 +9,18 @@
   - headers
 
 Api's internal, but if required should be done easily.
+
+Api's
+## Auth
+- Login
+- Logout
+
+## Uptime monitoring
+- Add monitoring url. 
+  - Url
+  - Protocol
+  - Region [Later]
+- Real time notification when monitoring site goes offline
+  - Email
+  - Webhook
+- Stats page [Later]
