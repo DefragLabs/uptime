@@ -2,15 +2,15 @@ package api
 
 import "net/http"
 
-// addMonitoringDetails api lets an user add an healthcheck url.
-func addMonitoringDetails(w http.ResponseWriter, r *http.Request) {
+// addMonitoringDetail api lets an user add an healthcheck url.
+func addMonitoringDetail(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func getMonitoringDetails(w http.ResponseWriter, r *http.Request) {
+func getMonitoringDetail(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func updateMonitoringDetails(w http.ResponseWriter, r *http.Request) {
+func updateMonitoringDetail(w http.ResponseWriter, r *http.Request) {
 
 }
