@@ -5,10 +5,19 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/mongodb/mongo-go-driver/bson/objectid"
+
 	"github.com/dineshs91/uptime/internal/db"
 	"github.com/dineshs91/uptime/internal/tasks"
 	"github.com/mongodb/mongo-go-driver/bson"
 )
+
+// TimeResult struct
+type TimeResult struct {
+	ID     objectid.ObjectID `bson:"_id"`
+	Uptime string            `bson:"uptime"`
+	Time   string            `bson:"time"`
+}
 
 // HomeHandler - handler for root path
 func HomeHandler(w http.ResponseWriter, r *http.Request) {
@@ -16,12 +25,12 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 
 	dbClient := db.GetDbClient()
 	collection := dbClient.Database("uptime").Collection("count")
-	result := bson.NewDocument()
-	filter := bson.NewDocument(bson.EC.String("uptime", "test"))
-	collection.FindOne(context.Background(), filter).Decode(result)
+	result := TimeResult{}
 
-	timeResult := result.LookupElement("time")
-	fmt.Fprintf(w, "Result: %s\n", timeResult.Value().StringValue())
+	filter := bson.NewDocument(bson.EC.String("uptime", "test"))
+	collection.FindOne(context.Background(), filter).Decode(&result)
+
+	fmt.Fprintf(w, "Result: %s\n", result.Time)
 }
 
 // PingHandler - handler for ping path
