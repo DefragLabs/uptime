@@ -31,9 +31,9 @@ Api's
 
 ## Db models
 
-### MonitoringUrl
+### MonitorURL
 
-|protocol|url|frequency|
+|protocol|url|frequency|unit|
 
 ### Notification
 
