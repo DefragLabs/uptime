@@ -12,6 +12,34 @@ func GenerateObjectID() objectid.ObjectID {
 	return objectid.New()
 }
 
+// CreateUser persists the user to db.
+func CreateUser(user User) interface{} {
+	dbClient := GetDbClient()
+	collection := dbClient.Database("uptime").Collection("users")
+
+	result, _ := collection.InsertOne(
+		context.Background(),
+		user,
+	)
+	return result.InsertedID
+}
+
+// GetUser from db.
+func GetUser(email string) User {
+	dbClient := GetDbClient()
+	collection := dbClient.Database("uptime").Collection("users")
+
+	user := User{}
+	collection.FindOne(
+		context.Background(),
+		bson.NewDocument(
+			bson.EC.String("email", email),
+		),
+	).Decode(&user)
+
+	return user
+}
+
 // AddMonitoringURL function persists the value in db.
 func AddMonitoringURL(monitorURL MonitorURL) interface{} {
 	dbClient := GetDbClient()

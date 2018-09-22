@@ -6,6 +6,12 @@ import (
 	"github.com/gorilla/mux"
 )
 
+func authRoutes(router *mux.Router) {
+	s := router.PathPrefix("/auth").Subrouter()
+	s.HandleFunc("/login", LoginHandler).Methods("POST")
+	s.HandleFunc("/register", RegisterHandler).Methods("POST")
+}
+
 func monitoringDetailsRoutes(router *mux.Router) {
 	router.HandleFunc("/monitoring-urls", AddMonitoringURLHandler).Methods("POST")
 	router.HandleFunc("/monitoring-urls", GetMonitoringURLHandler).Methods("GET")
@@ -19,6 +25,7 @@ func StartServer() {
 	router.HandleFunc("/ping", PingHandler)
 
 	monitoringDetailsRoutes(router)
+	authRoutes(router)
 
 	http.ListenAndServe(":8080", router)
 }
