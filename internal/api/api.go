@@ -7,9 +7,9 @@ import (
 )
 
 func monitoringDetailsRoutes(router *mux.Router) {
-	router.HandleFunc("/monitoring-details", AddMonitoringDetailHandler).Methods("POST")
-	router.HandleFunc("/monitoring-details", GetMonitoringDetailHandler).Methods("GET")
-	router.HandleFunc("/monitoring-details", UpdateMonitoringDetailHandler).Methods("PUT")
+	router.HandleFunc("/monitoring-urls", AddMonitoringURLHandler).Methods("POST")
+	router.HandleFunc("/monitoring-urls", GetMonitoringURLHandler).Methods("GET")
+	router.HandleFunc("/monitoring-urls", UpdateMonitoringURLHandler).Methods("PUT")
 }
 
 // StartServer Start the server.

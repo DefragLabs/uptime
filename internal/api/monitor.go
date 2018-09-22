@@ -2,15 +2,14 @@ package api
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/dineshs91/uptime/internal/db"
 )
 
-// AddMonitoringDetailHandler api lets an user add an healthcheck url.
-func AddMonitoringDetailHandler(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
+// AddMonitoringURLHandler api lets an user add an healthcheck url.
+func AddMonitoringURLHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusCreated)
 
 	decoder := json.NewDecoder(r.Body)
 	var monitorURL db.MonitorURL
@@ -19,18 +18,22 @@ func AddMonitoringDetailHandler(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
-	fmt.Println(monitorURL)
-	monitoringDetail := db.AddMonitoringDetail(monitorURL)
-	fmt.Println(monitoringDetail)
-	json.NewEncoder(w).Encode(monitoringDetail)
+	objectID := db.GenerateObjectID()
+	monitorURL.ID = objectID.Hex()
+
+	monitoringURL := db.AddMonitoringURL(monitorURL)
+	json.NewEncoder(w).Encode(monitoringURL)
 }
 
-// GetMonitoringDetailHandler api returns the monitoring urls configured
-func GetMonitoringDetailHandler(w http.ResponseWriter, r *http.Request) {
+// GetMonitoringURLHandler api returns the monitoring urls configured
+func GetMonitoringURLHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
 
+	monitoringURL := db.GetMonitoringURL()
+	json.NewEncoder(w).Encode(monitoringURL)
 }
 
-// UpdateMonitoringDetailHandler api lets the user update the details.
-func UpdateMonitoringDetailHandler(w http.ResponseWriter, r *http.Request) {
+// UpdateMonitoringURLHandler api lets the user update the details.
+func UpdateMonitoringURLHandler(w http.ResponseWriter, r *http.Request) {
 
 }
