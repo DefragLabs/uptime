@@ -12,6 +12,8 @@ services:
 
   db:
     image: mongo
+    volumes:
+      - dbdata:/data/db
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: uix23wr
@@ -22,3 +24,7 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_DB_NUMBER=0
+
+volumes:
+  dbdata:
+    driver: local
