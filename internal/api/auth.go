@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/dineshs91/uptime/internal/db"
@@ -39,6 +38,13 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	user := db.GetUser(userLoginForm.Email)
 	jwt := db.GetJWT(user, userLoginForm.Password)
+	data := make(map[string]string)
+	data["token"] = jwt
 
-	fmt.Fprint(w, jwt)
+	response := Response{
+		Success: true,
+		Data:    data,
+		Error:   nil,
+	}
+	json.NewEncoder(w).Encode(response)
 }
