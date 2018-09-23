@@ -1,0 +1,29 @@
+version: '3.3'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: docker/api/Dockerfile
+    ports:
+      - '9001:8080'
+    env_file:
+      - web-variables.env
+
+  db:
+    image: mongo
+    volumes:
+      - dbdata:/data/db
+    env_file:
+      - web-variables.env
+  
+  redis:
+    image: redis:3.2.11
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_DB_NUMBER=0
+
+volumes:
+  dbdata:
+    driver: local
