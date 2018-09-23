@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/dineshs91/uptime/internal/db"
@@ -37,5 +38,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 	user := db.GetUser(userLoginForm.Email)
-	db.GetJWT(user, userLoginForm.Password)
+	jwt := db.GetJWT(user, userLoginForm.Password)
+
+	fmt.Fprint(w, jwt)
 }

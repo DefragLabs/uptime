@@ -1,8 +1,10 @@
 package db
 
 import (
-	"fmt"
+	"os"
+	"time"
 
+	"github.com/dgrijalva/jwt-go"
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/dineshs91/uptime/internal/forms"
@@ -32,9 +34,16 @@ func RegisterUser(userRegisterForm forms.UserRegisterForm) User {
 
 // GetJWT validates user with password and returns JWT token.
 func GetJWT(user User, password string) string {
-	fmt.Println(password, user.PasswordHash, user)
 	if checkPasswordHash(password, user.PasswordHash) == true {
-		return "JWT success"
+		token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+			"email": user.Email,
+			"exp":   time.Now().Add(time.Hour * 168).Unix(),
+			"iat":   time.Now().Unix(),
+		})
+
+		// Sign and get the complete encoded token as a string using the secret
+		tokenString, _ := token.SignedString([]byte(os.Getenv("JWT_SECRET")))
+		return tokenString
 	}
 
 	panic("Password check failed")
