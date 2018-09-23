@@ -10,6 +10,7 @@ func authRoutes(router *mux.Router) {
 	s := router.PathPrefix("/auth").Subrouter()
 	s.HandleFunc("/login", LoginHandler).Methods("POST")
 	s.HandleFunc("/register", RegisterHandler).Methods("POST")
+	s.HandleFunc("/forgot-password", ForgotPasswordHandler).Methods("POST")
 }
 
 func monitoringDetailsRoutes(router *mux.Router) {

@@ -25,6 +25,12 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_DB_NUMBER=0
+  
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"
 
 volumes:
   dbdata:

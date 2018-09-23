@@ -13,3 +13,8 @@ type UserLoginForm struct {
 	Email    string
 	Password string
 }
+
+// ForgotPasswordForm - Forgot password form struct
+type ForgotPasswordForm struct {
+	Email string
+}

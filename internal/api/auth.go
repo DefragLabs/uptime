@@ -6,6 +6,7 @@ import (
 
 	"github.com/dineshs91/uptime/internal/db"
 	"github.com/dineshs91/uptime/internal/forms"
+	"github.com/dineshs91/uptime/internal/utils"
 )
 
 // RegisterHandler registers the user.
@@ -48,4 +49,17 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		Error:   nil,
 	}
 	json.NewEncoder(w).Encode(response)
+}
+
+// ForgotPasswordHandler sends forgot password email.
+func ForgotPasswordHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	decoder := json.NewDecoder(r.Body)
+	var forgotPasswordForm forms.ForgotPasswordForm
+	err := decoder.Decode(&forgotPasswordForm)
+	if err != nil {
+		panic(err)
+	}
+
+	utils.SendMail()
 }
