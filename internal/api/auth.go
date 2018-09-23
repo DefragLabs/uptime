@@ -28,6 +28,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 
 // LoginHandler validates the password & returns the JWT token.
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 	decoder := json.NewDecoder(r.Body)
 
