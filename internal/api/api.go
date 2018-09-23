@@ -20,7 +20,7 @@ func monitoringDetailsRoutes(router *mux.Router) {
 
 // StartServer Start the server.
 func StartServer() {
-	router := mux.NewRouter()
+	router := mux.NewRouter().PathPrefix("/api").Subrouter()
 	router.HandleFunc("/", HomeHandler)
 	router.HandleFunc("/ping", PingHandler)
 
