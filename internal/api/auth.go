@@ -2,7 +2,9 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/dineshs91/uptime/internal/db"
 	"github.com/dineshs91/uptime/internal/forms"
@@ -61,5 +63,16 @@ func ForgotPasswordHandler(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
-	utils.SendMail()
+	user := db.GetUser(forgotPasswordForm.Email)
+	toEmail := user.Email
+	forgotPasswordLink := fmt.Sprintf("http://%s/%s", r.Host, os.Getenv("FORGOT_PASSWORD_LINK"))
+
+	sub := "Forgot password"
+	msg := fmt.Sprintf(
+		"Hi,"+
+			"Click this <a href=%s></a>"+
+			"\r\n", forgotPasswordLink,
+	)
+
+	utils.SendMail(sub, msg, toEmail)
 }
