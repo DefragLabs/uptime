@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 	"os"
+	"path"
 
 	"github.com/dineshs91/uptime/internal/db"
 	"github.com/dineshs91/uptime/internal/forms"
@@ -65,7 +67,10 @@ func ForgotPasswordHandler(w http.ResponseWriter, r *http.Request) {
 
 	user := db.GetUser(forgotPasswordForm.Email)
 	toEmail := user.Email
-	forgotPasswordLink := fmt.Sprintf("http://%s/%s", r.Host, os.Getenv("FORGOT_PASSWORD_LINK"))
+	baseURL, _ := url.Parse(fmt.Sprintf("http://%s", r.Host))
+	baseURL.Path = path.Join(baseURL.Path, os.Getenv("FORGOT_PASSWORD_LINK"))
+
+	forgotPasswordLink := baseURL.String()
 
 	sub := "Forgot password"
 	msg := fmt.Sprintf(
