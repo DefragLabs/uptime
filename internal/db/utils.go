@@ -24,19 +24,18 @@ func CreateUser(user User) interface{} {
 	return result.InsertedID
 }
 
-func UpdateUser(user User) interface{} {
+// UpdateUser updates user
+func UpdateUser(user User) {
 	dbClient := GetDbClient()
 	collection := dbClient.Database("uptime").Collection("users")
 
-	result, _ := collection.FindOneAndUpdate(
+	collection.FindOneAndUpdate(
 		context.Background(),
 		bson.NewDocument(
 			bson.EC.String("_id", user.ID),
 		),
 		user,
 	)
-
-	return result.InsertedID
 }
 
 // GetUserByID from db.
@@ -120,9 +119,9 @@ func GetResetPassword(uid, code string) ResetPassword {
 	collection.FindOne(
 		context.Background(),
 		bson.NewDocument(
-			bson.EC.String("uid", uid)
-			bson.EC.String("code", code)
-		)
+			bson.EC.String("uid", uid),
+			bson.EC.String("code", code),
+		),
 	).Decode(&resetPassword)
 
 	return resetPassword

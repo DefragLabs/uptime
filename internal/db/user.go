@@ -21,6 +21,7 @@ type User struct {
 
 // ResetPassword struct
 type ResetPassword struct {
+	ID     string `bson:"_id" json:"id,omitempty"`
 	UserID string `bson:"userID"`
 	Code   string `bson:"code"`
 }
@@ -57,15 +58,18 @@ func GetJWT(user User, password string) string {
 
 // PasswordReset validates & resets the password.
 func PasswordReset(uid, code, newPassword string) bool {
-	user := db.GetUserByID(uid)
-	resetPassword := db.GetResetPassword(uid, code)
+	user := GetUserByID(uid)
+	resetPassword := GetResetPassword(uid, code)
 
-	if resetPassword != nil {
+	if resetPassword.ID != "" {
 		// updatePassword.
 		passwordHash, _ := bcrypt.GenerateFromPassword([]byte(newPassword), 14)
-		user.PasswordHash = passwordHash
+		user.PasswordHash = string(passwordHash)
 		UpdateUser(user)
+		return true
 	}
+
+	return false
 }
 
 func checkPasswordHash(password, hash string) bool {
