@@ -11,6 +11,7 @@ func authRoutes(router *mux.Router) {
 	s.HandleFunc("/login", LoginHandler).Methods("POST")
 	s.HandleFunc("/register", RegisterHandler).Methods("POST")
 	s.HandleFunc("/forgot-password", ForgotPasswordHandler).Methods("POST")
+	s.HandleFunc("/reset-password", ResetPasswordHandler).Methods("POST")
 }
 
 func monitoringDetailsRoutes(router *mux.Router) {

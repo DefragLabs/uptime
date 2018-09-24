@@ -24,8 +24,39 @@ func CreateUser(user User) interface{} {
 	return result.InsertedID
 }
 
-// GetUser from db.
-func GetUser(email string) User {
+func UpdateUser(user User) interface{} {
+	dbClient := GetDbClient()
+	collection := dbClient.Database("uptime").Collection("users")
+
+	result, _ := collection.FindOneAndUpdate(
+		context.Background(),
+		bson.NewDocument(
+			bson.EC.String("_id", user.ID),
+		),
+		user,
+	)
+
+	return result.InsertedID
+}
+
+// GetUserByID from db.
+func GetUserByID(userID string) User {
+	dbClient := GetDbClient()
+	collection := dbClient.Database("uptime").Collection("users")
+
+	user := User{}
+	collection.FindOne(
+		context.Background(),
+		bson.NewDocument(
+			bson.EC.String("_id", userID),
+		),
+	).Decode(&user)
+
+	return user
+}
+
+// GetUserByEmail from db.
+func GetUserByEmail(email string) User {
 	dbClient := GetDbClient()
 	collection := dbClient.Database("uptime").Collection("users")
 
@@ -78,4 +109,21 @@ func AddResetPassword(resetPassword ResetPassword) interface{} {
 		resetPassword,
 	)
 	return result.InsertedID
+}
+
+// GetResetPassword
+func GetResetPassword(uid, code string) ResetPassword {
+	dbClient := GetDbClient()
+	collection := dbClient.Database("uptime").Collection("resetPassword")
+
+	resetPassword := ResetPassword{}
+	collection.FindOne(
+		context.Background(),
+		bson.NewDocument(
+			bson.EC.String("uid", uid)
+			bson.EC.String("code", code)
+		)
+	).Decode(&resetPassword)
+
+	return resetPassword
 }

@@ -45,7 +45,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err)
 	}
-	user := db.GetUser(userLoginForm.Email)
+	user := db.GetUserByEmail(userLoginForm.Email)
 	jwt := db.GetJWT(user, userLoginForm.Password)
 	data := make(map[string]string)
 	data["token"] = jwt
@@ -68,7 +68,7 @@ func ForgotPasswordHandler(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
-	user := db.GetUser(forgotPasswordForm.Email)
+	user := db.GetUserByEmail(forgotPasswordForm.Email)
 	toEmail := user.Email
 
 	code := uuid.Must(uuid.NewV4())
@@ -91,4 +91,18 @@ func ForgotPasswordHandler(w http.ResponseWriter, r *http.Request) {
 	)
 
 	utils.SendMail(sub, msg, toEmail)
+}
+
+// ResetPasswordHandler password reset handler
+func ResetPasswordHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+
+	decoder := json.NewDecoder(r.Body)
+	var resetPasswordForm forms.ResetPasswordForm
+	err := decoder.Decode(&resetPasswordForm)
+	if err != nil {
+		panic(err)
+	}
+
+	
 }

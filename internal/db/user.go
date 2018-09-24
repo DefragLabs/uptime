@@ -55,6 +55,19 @@ func GetJWT(user User, password string) string {
 	panic("Password check failed")
 }
 
+// PasswordReset validates & resets the password.
+func PasswordReset(uid, code, newPassword string) bool {
+	user := db.GetUserByID(uid)
+	resetPassword := db.GetResetPassword(uid, code)
+
+	if resetPassword != nil {
+		// updatePassword.
+		passwordHash, _ := bcrypt.GenerateFromPassword([]byte(newPassword), 14)
+		user.PasswordHash = passwordHash
+		UpdateUser(user)
+	}
+}
+
 func checkPasswordHash(password, hash string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	return err == nil

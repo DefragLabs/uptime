@@ -18,3 +18,9 @@ type UserLoginForm struct {
 type ForgotPasswordForm struct {
 	Email string
 }
+
+type ResetPasswordForm struct {
+	UID         string `json:"uid"`
+	Code        string `json:"code"`
+	NewPassword string `json:"newPassword"`
+}
