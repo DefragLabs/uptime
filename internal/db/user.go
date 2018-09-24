@@ -19,6 +19,12 @@ type User struct {
 	PasswordHash string `bson:"passwordHash" json:"password"`
 }
 
+// ResetPassword struct
+type ResetPassword struct {
+	UserID string `bson:"userID"`
+	Code   string `bson:"code"`
+}
+
 // RegisterUser converts the password into hash and returns the user.
 func RegisterUser(userRegisterForm forms.UserRegisterForm) User {
 	passwordHash, _ := bcrypt.GenerateFromPassword([]byte(userRegisterForm.Password), 14)

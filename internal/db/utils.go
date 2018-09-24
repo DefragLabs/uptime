@@ -67,3 +67,15 @@ func GetMonitoringURL() MonitorURL {
 
 	return monitorURL
 }
+
+// AddResetPassword adds password code with the user id.
+func AddResetPassword(resetPassword ResetPassword) interface{} {
+	dbClient := GetDbClient()
+	collection := dbClient.Database("uptime").Collection("resetPassword")
+
+	result, _ := collection.InsertOne(
+		context.Background(),
+		resetPassword,
+	)
+	return result.InsertedID
+}
