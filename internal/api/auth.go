@@ -23,37 +23,44 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 
 	var userRegisterForm forms.UserRegisterForm
 	err := decoder.Decode(&userRegisterForm)
+
+	error := false
+	errorMsg := ""
 	if err != nil {
-		error := make(map[string]string)
-		error["message"] = "Invalid input format"
-		response := Response{
-			Success: false,
-			Data:    nil,
-			Error:   error,
-		}
-		json.NewEncoder(w).Encode(response)
-		return
+		error = true
+		errorMsg = "Invalid input format"
 	}
 
 	user := db.GetUserByEmail(userRegisterForm.Email)
-	validationMessage := userRegisterForm.Validate(user)
+	if user.ID != "" {
+		error = true
+		errorMsg = "Email already registered"
+	}
+
+	validationMessage := userRegisterForm.Validate()
 	if validationMessage != "" {
-		error := make(map[string]string)
-		error["message"] = validationMessage
+		error = true
+		errorMsg = validationMessage
+	}
+
+	if error {
+		errorVal := make(map[string]string)
+		errorVal["message"] = errorMsg
 		response := Response{
 			Success: false,
 			Data:    nil,
-			Error:   error,
+			Error:   errorVal,
 		}
+
 		json.NewEncoder(w).Encode(response)
 		return
 	}
 
-	user := db.RegisterUser(userRegisterForm)
+	newUser := db.RegisterUser(userRegisterForm)
 
 	objectID := db.GenerateObjectID()
 	user.ID = objectID.Hex()
-	db.CreateUser(user)
+	db.CreateUser(newUser)
 }
 
 // LoginHandler validates the password & returns the JWT token.

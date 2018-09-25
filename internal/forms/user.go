@@ -1,9 +1,5 @@
 package forms
 
-import (
-	"github.com/dineshs91/uptime/internal/db"
-)
-
 // UserRegisterForm - User register form struct
 type UserRegisterForm struct {
 	FirstName string `bson:"firstName" json:"firstName"`
@@ -13,7 +9,7 @@ type UserRegisterForm struct {
 }
 
 // Validate user registration form.
-func (userRegisterForm UserRegisterForm) Validate(user) string {
+func (userRegisterForm UserRegisterForm) Validate() string {
 	if userRegisterForm.FirstName == "" {
 		return "first name is required"
 	} else if userRegisterForm.LastName == "" {
@@ -22,10 +18,6 @@ func (userRegisterForm UserRegisterForm) Validate(user) string {
 		return "email is required"
 	} else if userRegisterForm.Password == "" {
 		return "password is required"
-	}
-
-	if user.ID {
-		return "email already exists"
 	}
 
 	return ""
