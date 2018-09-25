@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"log"
 
 	"github.com/mongodb/mongo-go-driver/bson"
 	"github.com/mongodb/mongo-go-driver/bson/objectid"
@@ -96,6 +97,37 @@ func GetMonitoringURL() MonitorURL {
 	).Decode(&monitorURL)
 
 	return monitorURL
+}
+
+// GetMonitoringURLS  gets all added url's
+func GetMonitoringURLS() []MonitorURL {
+	dbClient := GetDbClient()
+	collection := dbClient.Database("uptime").Collection("monitorURL")
+
+	count, _ := collection.Count(
+		context.Background(),
+		bson.NewDocument(),
+	)
+
+	monitorURLS := make([]MonitorURL, count)
+	cursor, _ := collection.Find(
+		context.Background(),
+		bson.NewDocument(),
+	)
+
+	i := 0
+	for cursor.Next(context.Background()) {
+		monitorURL := MonitorURL{}
+		err := cursor.Decode(&monitorURL)
+		if err != nil {
+			log.Fatal("error while parsing cursor for monitor urls")
+		}
+
+		monitorURLS[i] = monitorURL
+		i++
+	}
+
+	return monitorURLS
 }
 
 // AddResetPassword adds password code with the user id.

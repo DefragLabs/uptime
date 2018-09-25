@@ -16,6 +16,6 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 
 // PingHandler - handler for ping path
 func PingHandler(w http.ResponseWriter, r *http.Request) {
-	uptime.PingServer()
+	go uptime.StartScheduler()
 	fmt.Fprintf(w, "Pinging \n")
 }
