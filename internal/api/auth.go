@@ -104,5 +104,17 @@ func ResetPasswordHandler(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
-	
+	success := db.PasswordReset(resetPasswordForm.UID, resetPasswordForm.Code, resetPasswordForm.NewPassword)
+
+	if success == true {
+		user := db.GetUserByID(resetPasswordForm.UID)
+
+		sub := "Forgot password"
+		msg := fmt.Sprintf(
+			"Hi," +
+				"Your password has been reset successfully.",
+		)
+
+		utils.SendMail(sub, msg, user.Email)
+	}
 }
