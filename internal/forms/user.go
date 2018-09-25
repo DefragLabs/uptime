@@ -1,5 +1,9 @@
 package forms
 
+import (
+	"github.com/dineshs91/uptime/internal/db"
+)
+
 // UserRegisterForm - User register form struct
 type UserRegisterForm struct {
 	FirstName string `bson:"firstName" json:"firstName"`
@@ -8,10 +12,40 @@ type UserRegisterForm struct {
 	Password  string `bson:"password" json:"password"`
 }
 
+// Validate user registration form.
+func (userRegisterForm UserRegisterForm) Validate(user) string {
+	if userRegisterForm.FirstName == "" {
+		return "first name is required"
+	} else if userRegisterForm.LastName == "" {
+		return "last name is required"
+	} else if userRegisterForm.Email == "" {
+		return "email is required"
+	} else if userRegisterForm.Password == "" {
+		return "password is required"
+	}
+
+	if user.ID {
+		return "email already exists"
+	}
+
+	return ""
+}
+
 // UserLoginForm - User login form struct
 type UserLoginForm struct {
 	Email    string
 	Password string
+}
+
+// Validate user login form.
+func (userLoginForm UserLoginForm) Validate() string {
+	if userLoginForm.Email == "" {
+		return "email is required"
+	} else if userLoginForm.Password == "" {
+		return "password is required"
+	}
+
+	return ""
 }
 
 // ForgotPasswordForm - Forgot password form struct
@@ -19,8 +53,31 @@ type ForgotPasswordForm struct {
 	Email string
 }
 
+// Validate forgot password form
+func (forgotPasswordForm ForgotPasswordForm) Validate() string {
+	if forgotPasswordForm.Email == "" {
+		return "email is required"
+	}
+
+	return ""
+}
+
+// ResetPasswordForm is used for reset password
 type ResetPasswordForm struct {
 	UID         string `json:"uid"`
 	Code        string `json:"code"`
 	NewPassword string `json:"newPassword"`
+}
+
+// Validate reset password form.
+func (resetPasswordForm ResetPasswordForm) Validate() string {
+	if resetPasswordForm.UID == "" {
+		return "uid is required"
+	} else if resetPasswordForm.Code == "" {
+		return "code is required"
+	} else if resetPasswordForm.NewPassword == "" {
+		return "newPassword is required"
+	}
+
+	return ""
 }
