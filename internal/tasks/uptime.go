@@ -14,12 +14,14 @@ func pingURL(t time.Time) {
 
 	for _, monitorURL := range monitoringURLS {
 		url := fmt.Sprintf("%s://%s", monitorURL.Protocol, monitorURL.URL)
+		start := time.Now()
 		resp, err := http.Get(url)
+		duration := time.Since(start)
 		if err != nil {
 			// Don't fail like this.
 			log.Fatal("API ping failed")
 		}
-		fmt.Println(url, resp.Status, t.Format(time.UnixDate))
+		fmt.Println(duration, url, resp.Status, t.Format(time.UnixDate))
 	}
 }
 
