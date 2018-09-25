@@ -24,7 +24,29 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	var userRegisterForm forms.UserRegisterForm
 	err := decoder.Decode(&userRegisterForm)
 	if err != nil {
-		panic(err)
+		error := make(map[string]string)
+		error["message"] = "Invalid input format"
+		response := Response{
+			Success: false,
+			Data:    nil,
+			Error:   error,
+		}
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	user := db.GetUserByEmail(userRegisterForm.Email)
+	validationMessage := userRegisterForm.Validate(user)
+	if validationMessage != "" {
+		error := make(map[string]string)
+		error["message"] = validationMessage
+		response := Response{
+			Success: false,
+			Data:    nil,
+			Error:   error,
+		}
+		json.NewEncoder(w).Encode(response)
+		return
 	}
 
 	user := db.RegisterUser(userRegisterForm)
