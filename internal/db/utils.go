@@ -142,7 +142,7 @@ func AddResetPassword(resetPassword ResetPassword) interface{} {
 	return result.InsertedID
 }
 
-// GetResetPassword
+// GetResetPassword gets reset password record from db
 func GetResetPassword(uid, code string) ResetPassword {
 	dbClient := GetDbClient()
 	collection := dbClient.Database("uptime").Collection("resetPassword")
