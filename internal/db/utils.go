@@ -2,8 +2,8 @@ package db
 
 import (
 	"context"
+	"fmt"
 	"log"
-	"time"
 
 	"github.com/mongodb/mongo-go-driver/bson"
 	"github.com/mongodb/mongo-go-driver/bson/objectid"
@@ -132,9 +132,11 @@ func GetMonitoringURLS() []MonitorURL {
 }
 
 // AddMonitorDetail add monitor url detail to the db.
-func AddMonitorDetail(monitorURL MonitorURL, status, time string, duration time.Duration) {
+func AddMonitorDetail(monitorURL MonitorURL, status, time string, duration string) {
 	dbClient := GetDbClient()
 	collection := dbClient.Database("uptime").Collection("monitorURL")
+
+	fmt.Println(duration)
 
 	result := MonitorResult{
 		Status:   status,

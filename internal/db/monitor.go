@@ -1,7 +1,5 @@
 package db
 
-import "time"
-
 // MonitorURL struct represents a row in db.
 type MonitorURL struct {
 	ID string `bson:"_id" json:"id,omitempty"`
@@ -26,7 +24,7 @@ type MonitorResult struct {
 	Status string
 
 	// Duration of response
-	Duration time.Duration
+	Duration string
 
 	// Timestamp when the ping was run.
 	Time string
