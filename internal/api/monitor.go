@@ -29,8 +29,8 @@ func AddMonitoringURLHandler(w http.ResponseWriter, r *http.Request) {
 func GetMonitoringURLHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 
-	monitoringURL := db.GetMonitoringURL()
-	json.NewEncoder(w).Encode(monitoringURL)
+	monitoringURLS := db.GetMonitoringURLS()
+	json.NewEncoder(w).Encode(monitoringURLS)
 }
 
 // UpdateMonitoringURLHandler api lets the user update the details.
