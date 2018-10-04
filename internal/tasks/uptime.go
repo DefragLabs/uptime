@@ -15,6 +15,7 @@ func pingURL(t time.Time) {
 	for _, monitorURL := range monitoringURLS {
 		url := fmt.Sprintf("%s://%s", monitorURL.Protocol, monitorURL.URL)
 		start := time.Now()
+		fmt.Println(url, monitorURL.Results)
 		resp, err := http.Get(url)
 		duration := time.Since(start)
 		if err != nil {
@@ -22,6 +23,7 @@ func pingURL(t time.Time) {
 			log.Fatal("API ping failed")
 		}
 		fmt.Println(duration, url, resp.Status, t.Format(time.UnixDate))
+		db.AddMonitorDetail(monitorURL, resp.Status, time.UnixDate, duration)
 	}
 }
 
@@ -33,7 +35,7 @@ func StartScheduler() {
 		ticker := time.Tick(frequency)
 
 		for {
-			time.Sleep(time.Duration(180 * time.Second))
+			time.Sleep(time.Duration(600 * time.Second))
 			c <- <-ticker
 		}
 	}()

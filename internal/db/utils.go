@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"log"
+	"time"
 
 	"github.com/mongodb/mongo-go-driver/bson"
 	"github.com/mongodb/mongo-go-driver/bson/objectid"
@@ -128,6 +129,28 @@ func GetMonitoringURLS() []MonitorURL {
 	}
 
 	return monitorURLS
+}
+
+// AddMonitorDetail add monitor url detail to the db.
+func AddMonitorDetail(monitorURL MonitorURL, status, time string, duration time.Duration) {
+	dbClient := GetDbClient()
+	collection := dbClient.Database("uptime").Collection("monitorURL")
+
+	result := MonitorResult{
+		Status:   status,
+		Duration: duration,
+		Time:     time,
+	}
+
+	monitorURL.Results = append(monitorURL.Results, result)
+
+	collection.FindOneAndReplace(
+		context.Background(),
+		bson.NewDocument(
+			bson.EC.String("_id", monitorURL.ID),
+		),
+		monitorURL,
+	)
 }
 
 // AddResetPassword adds password code with the user id.

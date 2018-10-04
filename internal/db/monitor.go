@@ -1,5 +1,7 @@
 package db
 
+import "time"
+
 // MonitorURL struct represents a row in db.
 type MonitorURL struct {
 	ID string `bson:"_id" json:"id,omitempty"`
@@ -14,17 +16,17 @@ type MonitorURL struct {
 	Frequency int32 `bson:"frequency" json:"frequency"`
 
 	// Time unit (minutes, hours)
-	Unit    string           `bson:"unit" json:"unit"`
-	Results []*MonitorResult `bson:"results,omitempty" json:"results"`
+	Unit    string          `bson:"unit" json:"unit"`
+	Results []MonitorResult `bson:"results,omitempty" json:"results"`
 }
 
 // MonitorResult contains the ping result.
 type MonitorResult struct {
 	// Status code of the response.
-	Status int32
+	Status string
 
 	// Duration of response
-	Duration string
+	Duration time.Duration
 
 	// Timestamp when the ping was run.
 	Time string
