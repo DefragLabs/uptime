@@ -13,17 +13,23 @@ func pingURL(t time.Time) {
 	monitoringURLS := db.GetMonitoringURLS()
 
 	for _, monitorURL := range monitoringURLS {
+		currentTime := time.Now()
 		url := fmt.Sprintf("%s://%s", monitorURL.Protocol, monitorURL.URL)
-		start := time.Now()
-		fmt.Println(url, monitorURL.Results)
+		start := currentTime
+
+		if int32(currentTime.Minute())%monitorURL.Frequency != 0 {
+			continue
+		}
+
 		resp, err := http.Get(url)
 		duration := time.Since(start)
 		if err != nil {
 			// Don't fail like this.
 			log.Fatal("API ping failed")
 		}
-		fmt.Println(duration, url, resp.Status, t.Format(time.UnixDate))
-		db.AddMonitorDetail(monitorURL, resp.Status, time.UnixDate, duration)
+		timeStamp := t.Format(time.UnixDate)
+		fmt.Println(duration, url, resp.Status, timeStamp)
+		db.AddMonitorDetail(monitorURL, resp.Status, timeStamp, duration.String())
 	}
 }
 
@@ -35,7 +41,7 @@ func StartScheduler() {
 		ticker := time.Tick(frequency)
 
 		for {
-			time.Sleep(time.Duration(600 * time.Second))
+			time.Sleep(time.Duration(60 * time.Second))
 			c <- <-ticker
 		}
 	}()
