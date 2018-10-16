@@ -7,7 +7,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"golang.org/x/crypto/bcrypt"
 
-	"github.com/dineshs91/uptime/internal/forms"
+	"github.com/defraglabs/uptime/internal/forms"
 )
 
 // User details struct

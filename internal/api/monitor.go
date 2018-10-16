@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/dineshs91/uptime/internal/db"
+	"github.com/defraglabs/uptime/internal/db"
 )
 
 // AddMonitoringURLHandler api lets an user add an healthcheck url.

@@ -11,9 +11,9 @@ import (
 
 	"github.com/gofrs/uuid"
 
-	"github.com/dineshs91/uptime/internal/db"
-	"github.com/dineshs91/uptime/internal/forms"
-	"github.com/dineshs91/uptime/internal/utils"
+	"github.com/defraglabs/uptime/internal/db"
+	"github.com/defraglabs/uptime/internal/forms"
+	"github.com/defraglabs/uptime/internal/utils"
 )
 
 // RegisterHandler registers the user.

@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/dineshs91/uptime/internal/api"
-	"github.com/dineshs91/uptime/internal/tasks"
+	"github.com/defraglabs/uptime/internal/api"
+	"github.com/defraglabs/uptime/internal/tasks"
 )
 
 func main() {

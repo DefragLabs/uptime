@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/dineshs91/uptime/internal/db"
+	"github.com/defraglabs/uptime/internal/db"
 )
 
 func pingURL(t time.Time) {
