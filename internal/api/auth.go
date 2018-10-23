@@ -9,11 +9,10 @@ import (
 	"os"
 	"path"
 
-	"github.com/gofrs/uuid"
-
 	"github.com/defraglabs/uptime/internal/db"
 	"github.com/defraglabs/uptime/internal/forms"
 	"github.com/defraglabs/uptime/internal/utils"
+	"github.com/gofrs/uuid"
 )
 
 // RegisterHandler registers the user.
@@ -145,5 +144,15 @@ func ResetPasswordHandler(w http.ResponseWriter, r *http.Request) {
 		)
 
 		utils.SendMail(sub, msg, user.Email)
+	} else {
+		errorVal := make(map[string]string)
+		errorVal["message"] = "Password cannot be reset. Please try again."
+		response := Response{
+			Success: false,
+			Data:    nil,
+			Error:   errorVal,
+		}
+
+		json.NewEncoder(w).Encode(response)
 	}
 }
