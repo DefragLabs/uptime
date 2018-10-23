@@ -17,7 +17,6 @@ import (
 
 // RegisterHandler registers the user.
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusCreated)
 	decoder := json.NewDecoder(r.Body)
 
 	var userRegisterForm forms.UserRegisterForm
@@ -51,6 +50,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 			Error:   errorVal,
 		}
 
+		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(response)
 		return
 	}
@@ -60,12 +60,13 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	objectID := db.GenerateObjectID()
 	user.ID = objectID.Hex()
 	db.CreateUser(newUser)
+	w.WriteHeader(http.StatusCreated)
 }
 
 // LoginHandler validates the password & returns the JWT token.
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	w.WriteHeader(http.StatusOK)
+
 	decoder := json.NewDecoder(r.Body)
 
 	var userLoginForm forms.UserLoginForm
@@ -83,6 +84,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		Data:    data,
 		Error:   nil,
 	}
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(response)
 }
 
@@ -123,8 +125,6 @@ func ForgotPasswordHandler(w http.ResponseWriter, r *http.Request) {
 
 // ResetPasswordHandler password reset handler
 func ResetPasswordHandler(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
-
 	decoder := json.NewDecoder(r.Body)
 	var resetPasswordForm forms.ResetPasswordForm
 	err := decoder.Decode(&resetPasswordForm)
@@ -152,7 +152,8 @@ func ResetPasswordHandler(w http.ResponseWriter, r *http.Request) {
 			Data:    nil,
 			Error:   errorVal,
 		}
-
+		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(response)
 	}
+	w.WriteHeader(http.StatusOK)
 }
