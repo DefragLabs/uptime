@@ -9,15 +9,31 @@ import (
 	"github.com/mongodb/mongo-go-driver/bson/objectid"
 )
 
-// GenerateObjectID function generates & adds it to passed struct.
+const (
+	// Database points to the mongo database name.
+	Database = "uptime"
+
+	// UsersCollection is the name of the collection which contains users.
+	UsersCollection = "users"
+
+	// ResetPasswordCollection is the name of the collection which contains data required
+	// for password reset functionality.
+	ResetPasswordCollection = "resetPassword"
+
+	// MonitorURLCollection is the name of the collection which contains data of
+	// monitor URL's.
+	MonitorURLCollection = "monitorURL"
+)
+
+// GenerateObjectID generates a new objectid.
 func GenerateObjectID() objectid.ObjectID {
 	return objectid.New()
 }
 
-// CreateUser persists the user to db.
+// CreateUser func persists the user to db.
 func CreateUser(user User) interface{} {
 	dbClient := GetDbClient()
-	collection := dbClient.Database("uptime").Collection("users")
+	collection := dbClient.Database(Database).Collection(UsersCollection)
 
 	result, _ := collection.InsertOne(
 		context.Background(),
@@ -26,10 +42,10 @@ func CreateUser(user User) interface{} {
 	return result.InsertedID
 }
 
-// UpdateUser updates user
+// UpdateUser func updates user
 func UpdateUser(user User) {
 	dbClient := GetDbClient()
-	collection := dbClient.Database("uptime").Collection("users")
+	collection := dbClient.Database(Database).Collection(UsersCollection)
 
 	collection.FindOneAndUpdate(
 		context.Background(),
@@ -43,7 +59,7 @@ func UpdateUser(user User) {
 // GetUserByID from db.
 func GetUserByID(userID string) User {
 	dbClient := GetDbClient()
-	collection := dbClient.Database("uptime").Collection("users")
+	collection := dbClient.Database(Database).Collection(UsersCollection)
 
 	user := User{}
 	collection.FindOne(
@@ -59,7 +75,7 @@ func GetUserByID(userID string) User {
 // GetUserByEmail from db.
 func GetUserByEmail(email string) User {
 	dbClient := GetDbClient()
-	collection := dbClient.Database("uptime").Collection("users")
+	collection := dbClient.Database(Database).Collection(UsersCollection)
 
 	user := User{}
 	collection.FindOne(
@@ -75,7 +91,7 @@ func GetUserByEmail(email string) User {
 // AddMonitoringURL function persists the value in db.
 func AddMonitoringURL(monitorURL MonitorURL) interface{} {
 	dbClient := GetDbClient()
-	collection := dbClient.Database("uptime").Collection("monitorURL")
+	collection := dbClient.Database(Database).Collection(MonitorURLCollection)
 
 	result, _ := collection.InsertOne(
 		context.Background(),
@@ -87,7 +103,7 @@ func AddMonitoringURL(monitorURL MonitorURL) interface{} {
 // GetMonitoringURL function gets monitor url from db.
 func GetMonitoringURL() MonitorURL {
 	dbClient := GetDbClient()
-	collection := dbClient.Database("uptime").Collection("monitorURL")
+	collection := dbClient.Database(Database).Collection(MonitorURLCollection)
 
 	monitorURL := MonitorURL{}
 	collection.FindOne(
@@ -103,7 +119,7 @@ func GetMonitoringURL() MonitorURL {
 // GetMonitoringURLS  gets all added url's
 func GetMonitoringURLS() []MonitorURL {
 	dbClient := GetDbClient()
-	collection := dbClient.Database("uptime").Collection("monitorURL")
+	collection := dbClient.Database(Database).Collection(MonitorURLCollection)
 
 	count, _ := collection.Count(
 		context.Background(),
@@ -134,7 +150,7 @@ func GetMonitoringURLS() []MonitorURL {
 // AddMonitorDetail add monitor url detail to the db.
 func AddMonitorDetail(monitorURL MonitorURL, status, time string, duration string) {
 	dbClient := GetDbClient()
-	collection := dbClient.Database("uptime").Collection("monitorURL")
+	collection := dbClient.Database(Database).Collection(MonitorURLCollection)
 
 	fmt.Println(duration)
 
@@ -158,7 +174,7 @@ func AddMonitorDetail(monitorURL MonitorURL, status, time string, duration strin
 // AddResetPassword adds password code with the user id.
 func AddResetPassword(resetPassword ResetPassword) interface{} {
 	dbClient := GetDbClient()
-	collection := dbClient.Database("uptime").Collection("resetPassword")
+	collection := dbClient.Database(Database).Collection(ResetPasswordCollection)
 
 	result, _ := collection.InsertOne(
 		context.Background(),
@@ -170,7 +186,7 @@ func AddResetPassword(resetPassword ResetPassword) interface{} {
 // GetResetPassword gets reset password record from db
 func GetResetPassword(uid, code string) ResetPassword {
 	dbClient := GetDbClient()
-	collection := dbClient.Database("uptime").Collection("resetPassword")
+	collection := dbClient.Database(Database).Collection(ResetPasswordCollection)
 
 	resetPassword := ResetPassword{}
 	collection.FindOne(
