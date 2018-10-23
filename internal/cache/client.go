@@ -1,7 +1,10 @@
 package cache
 
 import (
+	"log"
 	"os"
+	"strconv"
+
 	"github.com/go-redis/redis"
 )
 
@@ -12,11 +15,17 @@ func getClient() *redis.Client {
 
 	redisAddr := redisHost + ":" + redisPort
 
+	redisDbNoInt, err := strconv.Atoi(redisDbNo)
+
+	if err != nil {
+		log.Fatal("Redis db no is not a valid integer")
+	}
+
 	client := redis.NewClient(
 		&redis.Options{
 			Addr: redisAddr,
-			Db: redisDbNo,
-		}
+			DB:   redisDbNoInt,
+		},
 	)
 
 	return client
