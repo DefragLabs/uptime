@@ -9,7 +9,8 @@ type MonitorURLForm struct {
 	Unit      string `bson:"unit" json:"unit"`
 }
 
-func (monitorURLForm MonitorURLForm) validate() string {
+// Validate monitor url form input
+func (monitorURLForm MonitorURLForm) Validate() string {
 	if monitorURLForm.Protocol == "" {
 		return "Protocol is required"
 	} else if monitorURLForm.URL == "" {
