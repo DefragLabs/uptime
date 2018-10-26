@@ -51,3 +51,7 @@ type - Email/webhook
 **Type - webhook**
 
 |type|webhookUrl|
+
+Interface
+- auth
+- form - validate

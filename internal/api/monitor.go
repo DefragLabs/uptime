@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/defraglabs/uptime/internal/db"
+	"github.com/defraglabs/uptime/internal/forms"
 )
 
 // AddMonitoringURLHandler api lets an user add an healthcheck url.
@@ -12,16 +13,36 @@ func AddMonitoringURLHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 
 	decoder := json.NewDecoder(r.Body)
-	var monitorURL db.MonitorURL
-	err := decoder.Decode(&monitorURL)
+	var monitorURLForm forms.MonitorURLForm
+	err := decoder.Decode(&monitorURLForm)
 	if err != nil {
 		panic(err)
+	}
+
+	validationMessage := monitorURLForm.Validate()
+	if validationMessage != "" {
+		error = true
+		errorMsg = validationMessage
+	}
+
+	if error {
+		errorVal := make(map[string]string)
+		errorVal["message"] = errorMsg
+		response := Response{
+			Success: false,
+			Data:    nil,
+			Error:   errorVal,
+		}
+
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(response)
+		return
 	}
 
 	objectID := db.GenerateObjectID()
 	monitorURL.ID = objectID.Hex()
 
-	monitoringURL := db.AddMonitoringURL(monitorURL)
+	monitoringURL := db.AddMonitoringURL(monitorURLForm)
 	json.NewEncoder(w).Encode(monitoringURL)
 }
 
