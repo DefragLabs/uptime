@@ -19,6 +19,9 @@ func AddMonitoringURLHandler(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
+	error := false
+	errorMsg := ""
+
 	validationMessage := monitorURLForm.Validate()
 	if validationMessage != "" {
 		error = true
@@ -40,7 +43,7 @@ func AddMonitoringURLHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	objectID := db.GenerateObjectID()
-	monitorURL.ID = objectID.Hex()
+	monitorURLForm.ID = objectID.Hex()
 
 	monitoringURL := db.AddMonitoringURL(monitorURLForm)
 	json.NewEncoder(w).Encode(monitoringURL)
