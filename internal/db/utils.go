@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/defraglabs/uptime/internal/forms"
 	"github.com/mongodb/mongo-go-driver/bson"
 	"github.com/mongodb/mongo-go-driver/bson/objectid"
 )
@@ -89,13 +90,13 @@ func GetUserByEmail(email string) User {
 }
 
 // AddMonitoringURL function persists the value in db.
-func AddMonitoringURL(monitorURL MonitorURL) interface{} {
+func AddMonitoringURL(monitorURLForm forms.MonitorURLForm) interface{} {
 	dbClient := GetDbClient()
 	collection := dbClient.Database(Database).Collection(MonitorURLCollection)
 
 	result, _ := collection.InsertOne(
 		context.Background(),
-		monitorURL,
+		monitorURLForm,
 	)
 	return result.InsertedID
 }
