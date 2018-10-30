@@ -10,7 +10,8 @@ import (
 )
 
 func pingURL(t time.Time) {
-	monitoringURLS := db.GetMonitoringURLS()
+	datastore := db.New()
+	monitoringURLS := datastore.GetMonitoringURLS()
 
 	for _, monitorURL := range monitoringURLS {
 		currentTime := time.Now()
@@ -29,7 +30,7 @@ func pingURL(t time.Time) {
 		}
 		timeStamp := t.Format(time.UnixDate)
 		fmt.Println(duration, url, resp.Status, timeStamp)
-		db.AddMonitorDetail(monitorURL, resp.Status, timeStamp, duration.String())
+		datastore.AddMonitorDetail(monitorURL, resp.Status, timeStamp, duration.String())
 	}
 }
 

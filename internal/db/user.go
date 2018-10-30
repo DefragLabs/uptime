@@ -4,10 +4,9 @@ import (
 	"os"
 	"time"
 
+	"github.com/defraglabs/uptime/internal/forms"
 	"github.com/dgrijalva/jwt-go"
 	"golang.org/x/crypto/bcrypt"
-
-	"github.com/defraglabs/uptime/internal/forms"
 )
 
 // User details struct
@@ -58,14 +57,15 @@ func GetJWT(user User, password string) string {
 
 // PasswordReset validates & resets the password.
 func PasswordReset(uid, code, newPassword string) bool {
-	user := GetUserByID(uid)
-	resetPassword := GetResetPassword(uid, code)
+	datastore := New()
+	user := datastore.GetUserByID(uid)
+	resetPassword := datastore.GetResetPassword(uid, code)
 
 	if resetPassword.ID != "" {
 		// updatePassword.
 		passwordHash, _ := bcrypt.GenerateFromPassword([]byte(newPassword), 14)
 		user.PasswordHash = string(passwordHash)
-		UpdateUser(user)
+		// UpdateUser(user)
 		return true
 	}
 

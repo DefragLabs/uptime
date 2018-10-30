@@ -45,7 +45,8 @@ func AddMonitoringURLHandler(w http.ResponseWriter, r *http.Request) {
 	objectID := db.GenerateObjectID()
 	monitorURLForm.ID = objectID.Hex()
 
-	monitoringURL := db.AddMonitoringURL(monitorURLForm)
+	datastore := db.New()
+	monitoringURL := datastore.AddMonitoringURL(monitorURLForm)
 	json.NewEncoder(w).Encode(monitoringURL)
 }
 
@@ -53,7 +54,8 @@ func AddMonitoringURLHandler(w http.ResponseWriter, r *http.Request) {
 func GetMonitoringURLHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 
-	monitoringURLS := db.GetMonitoringURLS()
+	datastore := db.New()
+	monitoringURLS := datastore.GetMonitoringURLS()
 	json.NewEncoder(w).Encode(monitoringURLS)
 }
 

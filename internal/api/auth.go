@@ -29,7 +29,8 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		errorMsg = "Invalid input format"
 	}
 
-	user := db.GetUserByEmail(userRegisterForm.Email)
+	datastore := db.New()
+	user := datastore.GetUserByEmail(userRegisterForm.Email)
 	if user.ID != "" {
 		error = true
 		errorMsg = "Email already registered"
@@ -58,8 +59,9 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	newUser := db.RegisterUser(userRegisterForm)
 
 	objectID := db.GenerateObjectID()
-	user.ID = objectID.Hex()
-	db.CreateUser(newUser)
+	newUser.ID = objectID.Hex()
+
+	datastore.CreateUser(newUser)
 	w.WriteHeader(http.StatusCreated)
 }
 
@@ -74,7 +76,10 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err)
 	}
-	user := db.GetUserByEmail(userLoginForm.Email)
+
+	datastore := db.New()
+
+	user := datastore.GetUserByEmail(userLoginForm.Email)
 	jwt := db.GetJWT(user, userLoginForm.Password)
 	data := make(map[string]string)
 	data["token"] = jwt
@@ -98,7 +103,8 @@ func ForgotPasswordHandler(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
-	user := db.GetUserByEmail(forgotPasswordForm.Email)
+	datastore := db.New()
+	user := datastore.GetUserByEmail(forgotPasswordForm.Email)
 	toEmail := user.Email
 
 	code := uuid.Must(uuid.NewV4())
@@ -106,7 +112,7 @@ func ForgotPasswordHandler(w http.ResponseWriter, r *http.Request) {
 
 	resetPassword := db.ResetPassword{UserID: user.ID, Code: hexCode}
 
-	db.AddResetPassword(resetPassword)
+	datastore.AddResetPassword(resetPassword)
 
 	baseURL, _ := url.Parse(fmt.Sprintf("http://%s", r.Host))
 	baseURL.Path = path.Join(baseURL.Path, os.Getenv("FORGOT_PASSWORD_LINK"), user.ID, hexCode)
@@ -133,9 +139,10 @@ func ResetPasswordHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	success := db.PasswordReset(resetPasswordForm.UID, resetPasswordForm.Code, resetPasswordForm.NewPassword)
+	datastore := db.New()
 
 	if success == true {
-		user := db.GetUserByID(resetPasswordForm.UID)
+		user := datastore.GetUserByID(resetPasswordForm.UID)
 
 		sub := "Forgot password"
 		msg := fmt.Sprintf(

@@ -32,20 +32,21 @@ func GenerateObjectID() objectid.ObjectID {
 }
 
 // CreateUser func persists the user to db.
-func CreateUser(user User) interface{} {
-	dbClient := GetDbClient()
+func (datastore *datastore) CreateUser(user User) interface{} {
+	dbClient := datastore.client
 	collection := dbClient.Database(Database).Collection(UsersCollection)
 
-	result, _ := collection.InsertOne(
+	result, err := collection.InsertOne(
 		context.Background(),
 		user,
 	)
+	fmt.Println(result, err)
 	return result.InsertedID
 }
 
 // UpdateUser func updates user
-func UpdateUser(user User) {
-	dbClient := GetDbClient()
+func (datastore *datastore) UpdateUser(user User) {
+	dbClient := datastore.client
 	collection := dbClient.Database(Database).Collection(UsersCollection)
 
 	collection.FindOneAndUpdate(
@@ -58,8 +59,8 @@ func UpdateUser(user User) {
 }
 
 // GetUserByID from db.
-func GetUserByID(userID string) User {
-	dbClient := GetDbClient()
+func (datastore *datastore) GetUserByID(userID string) User {
+	dbClient := datastore.client
 	collection := dbClient.Database(Database).Collection(UsersCollection)
 
 	user := User{}
@@ -74,8 +75,8 @@ func GetUserByID(userID string) User {
 }
 
 // GetUserByEmail from db.
-func GetUserByEmail(email string) User {
-	dbClient := GetDbClient()
+func (datastore *datastore) GetUserByEmail(email string) User {
+	dbClient := datastore.client
 	collection := dbClient.Database(Database).Collection(UsersCollection)
 
 	user := User{}
@@ -90,8 +91,8 @@ func GetUserByEmail(email string) User {
 }
 
 // AddMonitoringURL function persists the value in db.
-func AddMonitoringURL(monitorURLForm forms.MonitorURLForm) interface{} {
-	dbClient := GetDbClient()
+func (datastore *datastore) AddMonitoringURL(monitorURLForm forms.MonitorURLForm) interface{} {
+	dbClient := datastore.client
 	collection := dbClient.Database(Database).Collection(MonitorURLCollection)
 
 	result, _ := collection.InsertOne(
@@ -102,8 +103,8 @@ func AddMonitoringURL(monitorURLForm forms.MonitorURLForm) interface{} {
 }
 
 // GetMonitoringURL function gets monitor url from db.
-func GetMonitoringURL() MonitorURL {
-	dbClient := GetDbClient()
+func (datastore *datastore) GetMonitoringURL() MonitorURL {
+	dbClient := datastore.client
 	collection := dbClient.Database(Database).Collection(MonitorURLCollection)
 
 	monitorURL := MonitorURL{}
@@ -118,8 +119,8 @@ func GetMonitoringURL() MonitorURL {
 }
 
 // GetMonitoringURLS  gets all added url's
-func GetMonitoringURLS() []MonitorURL {
-	dbClient := GetDbClient()
+func (datastore *datastore) GetMonitoringURLS() []MonitorURL {
+	dbClient := datastore.client
 	collection := dbClient.Database(Database).Collection(MonitorURLCollection)
 
 	count, _ := collection.Count(
@@ -149,8 +150,8 @@ func GetMonitoringURLS() []MonitorURL {
 }
 
 // AddMonitorDetail add monitor url detail to the db.
-func AddMonitorDetail(monitorURL MonitorURL, status, time string, duration string) {
-	dbClient := GetDbClient()
+func (datastore *datastore) AddMonitorDetail(monitorURL MonitorURL, status, time, duration string) {
+	dbClient := datastore.client
 	collection := dbClient.Database(Database).Collection(MonitorURLCollection)
 
 	fmt.Println(duration)
@@ -173,8 +174,8 @@ func AddMonitorDetail(monitorURL MonitorURL, status, time string, duration strin
 }
 
 // AddResetPassword adds password code with the user id.
-func AddResetPassword(resetPassword ResetPassword) interface{} {
-	dbClient := GetDbClient()
+func (datastore *datastore) AddResetPassword(resetPassword ResetPassword) interface{} {
+	dbClient := datastore.client
 	collection := dbClient.Database(Database).Collection(ResetPasswordCollection)
 
 	result, _ := collection.InsertOne(
@@ -185,8 +186,8 @@ func AddResetPassword(resetPassword ResetPassword) interface{} {
 }
 
 // GetResetPassword gets reset password record from db
-func GetResetPassword(uid, code string) ResetPassword {
-	dbClient := GetDbClient()
+func (datastore *datastore) GetResetPassword(uid, code string) ResetPassword {
+	dbClient := datastore.client
 	collection := dbClient.Database(Database).Collection(ResetPasswordCollection)
 
 	resetPassword := ResetPassword{}
