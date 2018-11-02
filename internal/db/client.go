@@ -11,13 +11,19 @@ import (
 
 var mongoClient *mongo.Client
 
-// datastore is a wrapper around mongo.Client.
-type datastore struct {
-	client *mongo.Client
+// Datastore is a wrapper around mongo.Client.
+type Datastore struct {
+	Client       *mongo.Client
+	DatabaseName string
 }
 
 // New creates a new mongo.Client
-func New() *datastore {
+func New() *Datastore {
+	databaseName, ok := os.LookupEnv("MONGO_DATABASE_NAME")
+	if !ok {
+		databaseName = "uptime"
+	}
+
 	mongoPass := os.Getenv("MONGO_INITDB_ROOT_PASSWORD")
 	connString := fmt.Sprintf("mongodb://root:%s@db:27017", mongoPass)
 	if mongoClient == nil {
@@ -33,7 +39,8 @@ func New() *datastore {
 		mongoClient = client
 	}
 
-	return &datastore{
-		client: mongoClient,
+	return &Datastore{
+		Client:       mongoClient,
+		DatabaseName: databaseName,
 	}
 }

@@ -11,9 +11,6 @@ import (
 )
 
 const (
-	// Database points to the mongo database name.
-	Database = "uptime"
-
 	// UsersCollection is the name of the collection which contains users.
 	UsersCollection = "users"
 
@@ -32,9 +29,9 @@ func GenerateObjectID() objectid.ObjectID {
 }
 
 // CreateUser func persists the user to db.
-func (datastore *datastore) CreateUser(user User) interface{} {
-	dbClient := datastore.client
-	collection := dbClient.Database(Database).Collection(UsersCollection)
+func (datastore *Datastore) CreateUser(user User) interface{} {
+	dbClient := datastore.Client
+	collection := dbClient.Database(datastore.DatabaseName).Collection(UsersCollection)
 
 	result, err := collection.InsertOne(
 		context.Background(),
@@ -45,9 +42,9 @@ func (datastore *datastore) CreateUser(user User) interface{} {
 }
 
 // UpdateUser func updates user
-func (datastore *datastore) UpdateUser(user User) {
-	dbClient := datastore.client
-	collection := dbClient.Database(Database).Collection(UsersCollection)
+func (datastore *Datastore) UpdateUser(user User) {
+	dbClient := datastore.Client
+	collection := dbClient.Database(datastore.DatabaseName).Collection(UsersCollection)
 
 	collection.FindOneAndUpdate(
 		context.Background(),
@@ -59,9 +56,9 @@ func (datastore *datastore) UpdateUser(user User) {
 }
 
 // GetUserByID from db.
-func (datastore *datastore) GetUserByID(userID string) User {
-	dbClient := datastore.client
-	collection := dbClient.Database(Database).Collection(UsersCollection)
+func (datastore *Datastore) GetUserByID(userID string) User {
+	dbClient := datastore.Client
+	collection := dbClient.Database(datastore.DatabaseName).Collection(UsersCollection)
 
 	user := User{}
 	collection.FindOne(
@@ -75,9 +72,9 @@ func (datastore *datastore) GetUserByID(userID string) User {
 }
 
 // GetUserByEmail from db.
-func (datastore *datastore) GetUserByEmail(email string) User {
-	dbClient := datastore.client
-	collection := dbClient.Database(Database).Collection(UsersCollection)
+func (datastore *Datastore) GetUserByEmail(email string) User {
+	dbClient := datastore.Client
+	collection := dbClient.Database(datastore.DatabaseName).Collection(UsersCollection)
 
 	user := User{}
 	collection.FindOne(
@@ -91,9 +88,9 @@ func (datastore *datastore) GetUserByEmail(email string) User {
 }
 
 // AddMonitoringURL function persists the value in db.
-func (datastore *datastore) AddMonitoringURL(monitorURLForm forms.MonitorURLForm) interface{} {
-	dbClient := datastore.client
-	collection := dbClient.Database(Database).Collection(MonitorURLCollection)
+func (datastore *Datastore) AddMonitoringURL(monitorURLForm forms.MonitorURLForm) interface{} {
+	dbClient := datastore.Client
+	collection := dbClient.Database(datastore.DatabaseName).Collection(MonitorURLCollection)
 
 	result, _ := collection.InsertOne(
 		context.Background(),
@@ -103,9 +100,9 @@ func (datastore *datastore) AddMonitoringURL(monitorURLForm forms.MonitorURLForm
 }
 
 // GetMonitoringURL function gets monitor url from db.
-func (datastore *datastore) GetMonitoringURL() MonitorURL {
-	dbClient := datastore.client
-	collection := dbClient.Database(Database).Collection(MonitorURLCollection)
+func (datastore *Datastore) GetMonitoringURL() MonitorURL {
+	dbClient := datastore.Client
+	collection := dbClient.Database(datastore.DatabaseName).Collection(MonitorURLCollection)
 
 	monitorURL := MonitorURL{}
 	collection.FindOne(
@@ -119,9 +116,9 @@ func (datastore *datastore) GetMonitoringURL() MonitorURL {
 }
 
 // GetMonitoringURLS  gets all added url's
-func (datastore *datastore) GetMonitoringURLS() []MonitorURL {
-	dbClient := datastore.client
-	collection := dbClient.Database(Database).Collection(MonitorURLCollection)
+func (datastore *Datastore) GetMonitoringURLS() []MonitorURL {
+	dbClient := datastore.Client
+	collection := dbClient.Database(datastore.DatabaseName).Collection(MonitorURLCollection)
 
 	count, _ := collection.Count(
 		context.Background(),
@@ -150,9 +147,9 @@ func (datastore *datastore) GetMonitoringURLS() []MonitorURL {
 }
 
 // AddMonitorDetail add monitor url detail to the db.
-func (datastore *datastore) AddMonitorDetail(monitorURL MonitorURL, status, time, duration string) {
-	dbClient := datastore.client
-	collection := dbClient.Database(Database).Collection(MonitorURLCollection)
+func (datastore *Datastore) AddMonitorDetail(monitorURL MonitorURL, status, time, duration string) {
+	dbClient := datastore.Client
+	collection := dbClient.Database(datastore.DatabaseName).Collection(MonitorURLCollection)
 
 	fmt.Println(duration)
 
@@ -174,9 +171,9 @@ func (datastore *datastore) AddMonitorDetail(monitorURL MonitorURL, status, time
 }
 
 // AddResetPassword adds password code with the user id.
-func (datastore *datastore) AddResetPassword(resetPassword ResetPassword) interface{} {
-	dbClient := datastore.client
-	collection := dbClient.Database(Database).Collection(ResetPasswordCollection)
+func (datastore *Datastore) AddResetPassword(resetPassword ResetPassword) interface{} {
+	dbClient := datastore.Client
+	collection := dbClient.Database(datastore.DatabaseName).Collection(ResetPasswordCollection)
 
 	result, _ := collection.InsertOne(
 		context.Background(),
@@ -186,9 +183,9 @@ func (datastore *datastore) AddResetPassword(resetPassword ResetPassword) interf
 }
 
 // GetResetPassword gets reset password record from db
-func (datastore *datastore) GetResetPassword(uid, code string) ResetPassword {
-	dbClient := datastore.client
-	collection := dbClient.Database(Database).Collection(ResetPasswordCollection)
+func (datastore *Datastore) GetResetPassword(uid, code string) ResetPassword {
+	dbClient := datastore.Client
+	collection := dbClient.Database(datastore.DatabaseName).Collection(ResetPasswordCollection)
 
 	resetPassword := ResetPassword{}
 	collection.FindOne(

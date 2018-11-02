@@ -2,16 +2,26 @@ package api
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 
+	"github.com/defraglabs/uptime/internal/db"
 	"github.com/defraglabs/uptime/internal/forms"
 )
 
+func clearDatabase() {
+	datastore := db.New()
+	datastore.Client.Database(datastore.DatabaseName).Collection(db.UsersCollection).Drop(context.Background())
+}
+
 func TestRegisterHandler(t *testing.T) {
+	os.Setenv("MONGO_DATABASE_NAME", "uptime_test")
+	defer clearDatabase()
+
 	userRegisterForm := forms.UserRegisterForm{
 		FirstName: "Alice",
 		LastName:  "Wonderland",
@@ -32,8 +42,6 @@ func TestRegisterHandler(t *testing.T) {
 	res := responseWriter.Result()
 	defer res.Body.Close()
 
-	b, _ := ioutil.ReadAll(res.Body)
-	t.Errorf(string(b))
 	if res.StatusCode != http.StatusCreated {
 		t.Errorf("expected status CREATED, got %v", res.StatusCode)
 	}

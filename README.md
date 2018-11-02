@@ -11,7 +11,7 @@
 Api's internal, but if required should be done easily.
 
 ## Tests
-Run tests using this command `go test ./...`
+Run tests using this command `go test ./...`. Currently run them from the api container.
 
 Api's
 ## Auth
