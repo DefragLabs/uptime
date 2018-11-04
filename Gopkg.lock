@@ -75,6 +75,14 @@
   version = "v1.6.2"
 
 [[projects]]
+  digest = "1:0a69a1c0db3591fcefb47f115b224592c8dfa4368b7ba9fae509d5e16cdc95c8"
+  name = "github.com/konsorten/go-windows-terminal-sequences"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "5c8c8bd35d3832f5d134ae1e1e375b69a4d25242"
+  version = "v1.0.1"
+
+[[projects]]
   digest = "1:c990d4427f9d6c34549935233b7034bed5460bc4db829f3cdf3392160f35dcaf"
   name = "github.com/mongodb/mongo-go-driver"
   packages = [
@@ -134,6 +142,14 @@
   version = "v0.0.13"
 
 [[projects]]
+  digest = "1:69b1cc331fca23d702bd72f860c6a647afd0aa9fcbc1d0659b1365e26546dd70"
+  name = "github.com/sirupsen/logrus"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "bcd833dfe83d3cebad139e4a29ed79cb2318bf95"
+  version = "v1.2.0"
+
+[[projects]]
   branch = "master"
   digest = "1:40fdfd6ab85ca32b6935853bbba35935dcb1d796c8135efd85947566c76e662e"
   name = "github.com/xdg/scram"
@@ -151,12 +167,13 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:318fbcf92cf6f5f01a8e28059612a09671e8d446c1be41020171dd3eeb3dfb9e"
+  digest = "1:7310f5459b88177d24e26c5ec7deb100b78ec03c0437d7a7aaec3c7eac333a55"
   name = "golang.org/x/crypto"
   packages = [
     "bcrypt",
     "blowfish",
     "pbkdf2",
+    "ssh/terminal",
   ]
   pruneopts = "UT"
   revision = "0709b304e793a5edb4a2c0145f281ecdc20838a4"
@@ -176,6 +193,17 @@
   packages = ["semaphore"]
   pruneopts = "UT"
   revision = "1d60e4601c6fd243af51cc01ddf169918a5407ca"
+
+[[projects]]
+  branch = "master"
+  digest = "1:417d27a82efb8473554234a282be33d23b0d6adc121e636b55950f913ac071d6"
+  name = "golang.org/x/sys"
+  packages = [
+    "unix",
+    "windows",
+  ]
+  pruneopts = "UT"
+  revision = "9b800f95dbbc54abff0acf7ee32d88ba4e328c89"
 
 [[projects]]
   digest = "1:8029e9743749d4be5bc9f7d42ea1659471767860f0cdc34d37c3111bd308a295"
@@ -203,6 +231,7 @@
     "github.com/mongodb/mongo-go-driver/bson",
     "github.com/mongodb/mongo-go-driver/bson/objectid",
     "github.com/mongodb/mongo-go-driver/mongo",
+    "github.com/sirupsen/logrus",
     "golang.org/x/crypto/bcrypt",
   ]
   solver-name = "gps-cdcl"
