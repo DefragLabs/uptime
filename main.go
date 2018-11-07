@@ -8,10 +8,13 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+func init() {
+	setupLogin()
+}
+
 func main() {
 	go uptime.StartScheduler()
 
-	setupLogin()
 	api.StartServer()
 }
 
