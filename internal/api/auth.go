@@ -13,6 +13,7 @@ import (
 	"github.com/defraglabs/uptime/internal/forms"
 	"github.com/defraglabs/uptime/internal/utils"
 	"github.com/gofrs/uuid"
+	log "github.com/sirupsen/logrus"
 )
 
 // RegisterHandler registers the user.
@@ -53,6 +54,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(response)
+		log.Info("Registration failed")
 		return
 	}
 
@@ -62,6 +64,8 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	newUser.ID = objectID.Hex()
 
 	datastore.CreateUser(newUser)
+
+	log.Info("Registration successful")
 	w.WriteHeader(http.StatusCreated)
 }
 
