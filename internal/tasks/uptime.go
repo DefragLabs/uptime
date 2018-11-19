@@ -2,16 +2,18 @@ package uptime
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"time"
 
 	"github.com/defraglabs/uptime/internal/db"
+	log "github.com/sirupsen/logrus"
 )
 
 func pingURL(t time.Time) {
 	datastore := db.New()
 	monitoringURLS := datastore.GetMonitoringURLS()
+
+	log.Infof("Start pinging urls. Total urls %d", len(monitoringURLS))
 
 	for _, monitorURL := range monitoringURLS {
 		currentTime := time.Now()
@@ -26,7 +28,7 @@ func pingURL(t time.Time) {
 		duration := time.Since(start)
 		if err != nil {
 			// Don't fail like this.
-			log.Fatal("API ping failed")
+			log.Warn("API ping failed")
 		}
 		timeStamp := t.Format(time.UnixDate)
 		fmt.Println(duration, url, resp.Status, timeStamp)
@@ -36,6 +38,7 @@ func pingURL(t time.Time) {
 
 // StartScheduler runs the scheduler
 func StartScheduler() {
+	log.Info("Starting scheduler")
 	c := make(chan time.Time)
 	go func() {
 		var frequency = time.Duration(100)
