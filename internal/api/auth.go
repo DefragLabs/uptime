@@ -65,7 +65,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 
 	datastore.CreateUser(newUser)
 
-	log.Info(fmt.Sprintf("Registration successful with email %s", newUser.Email))
+	log.Infof("Registration successful with email %s", newUser.Email)
 	w.WriteHeader(http.StatusCreated)
 }
 
@@ -197,7 +197,7 @@ func ForgotPasswordHandler(w http.ResponseWriter, r *http.Request) {
 
 	utils.SendMail(sub, msg, toEmail)
 
-	log.Info(fmt.Sprintf("Successfully sent forgot password mail to %s", toEmail))
+	log.Infof("Successfully sent forgot password mail to %s", toEmail)
 }
 
 // ResetPasswordHandler password reset handler
