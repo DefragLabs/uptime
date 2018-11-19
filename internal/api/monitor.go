@@ -2,10 +2,12 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/defraglabs/uptime/internal/db"
 	"github.com/defraglabs/uptime/internal/forms"
+	log "github.com/sirupsen/logrus"
 )
 
 // AddMonitoringURLHandler api lets an user add an healthcheck url.
@@ -39,6 +41,7 @@ func AddMonitoringURLHandler(w http.ResponseWriter, r *http.Request) {
 
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(response)
+		log.Info(fmt.Sprintf("Unable to add monitoring url %s", monitorURLForm.URL))
 		return
 	}
 
@@ -47,6 +50,8 @@ func AddMonitoringURLHandler(w http.ResponseWriter, r *http.Request) {
 
 	datastore := db.New()
 	monitoringURL := datastore.AddMonitoringURL(monitorURLForm)
+
+	log.Info(fmt.Sprintf("Added monitoring url %s", monitorURLForm.URL))
 	json.NewEncoder(w).Encode(monitoringURL)
 }
 

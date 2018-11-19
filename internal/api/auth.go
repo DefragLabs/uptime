@@ -34,7 +34,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	user := datastore.GetUserByEmail(userRegisterForm.Email)
 	if user.ID != "" {
 		error = true
-		errorMsg = "Email already registered"
+		errorMsg = fmt.Sprintf("Email %s already registered", user.Email)
 	}
 
 	validationMessage := userRegisterForm.Validate()
@@ -65,7 +65,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 
 	datastore.CreateUser(newUser)
 
-	log.Info("Registration successful")
+	log.Info(fmt.Sprintf("Registration successful with email %s", newUser.Email))
 	w.WriteHeader(http.StatusCreated)
 }
 
@@ -77,13 +77,45 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	var userLoginForm forms.UserLoginForm
 	err := decoder.Decode(&userLoginForm)
+
+	error := false
+	errorMsg := ""
+
 	if err != nil {
-		panic(err)
+		error = true
+		errorMsg = "Invalid input format"
 	}
 
 	datastore := db.New()
 
 	user := datastore.GetUserByEmail(userLoginForm.Email)
+	fmt.Print(user, user.ID)
+	if user.ID == "" {
+		error = true
+		errorMsg = "User not found"
+	}
+
+	validationMessage := userLoginForm.Validate()
+	if validationMessage != "" {
+		error = true
+		errorMsg = validationMessage
+	}
+
+	if error {
+		errorVal := make(map[string]string)
+		errorVal["message"] = errorMsg
+		response := Response{
+			Success: false,
+			Data:    nil,
+			Error:   errorVal,
+		}
+
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(response)
+		log.Info("Login failed")
+		return
+	}
+
 	jwt := db.GetJWT(user, userLoginForm.Password)
 	data := make(map[string]string)
 	data["token"] = jwt
@@ -94,6 +126,8 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		Error:   nil,
 	}
 	w.WriteHeader(http.StatusOK)
+
+	log.Info("Login successful")
 	json.NewEncoder(w).Encode(response)
 }
 
@@ -103,12 +137,43 @@ func ForgotPasswordHandler(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	var forgotPasswordForm forms.ForgotPasswordForm
 	err := decoder.Decode(&forgotPasswordForm)
+
+	error := false
+	errorMsg := ""
+
 	if err != nil {
-		panic(err)
+		error = true
+		errorMsg = "Invalid input format"
 	}
 
 	datastore := db.New()
 	user := datastore.GetUserByEmail(forgotPasswordForm.Email)
+
+	if user.ID == "" {
+		error = true
+		errorMsg = "User not found"
+	}
+	validationMessage := forgotPasswordForm.Validate()
+	if validationMessage != "" {
+		error = true
+		errorMsg = validationMessage
+	}
+
+	if error {
+		errorVal := make(map[string]string)
+		errorVal["message"] = errorMsg
+		response := Response{
+			Success: false,
+			Data:    nil,
+			Error:   errorVal,
+		}
+
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(response)
+		log.Info("Unable to process forgot password.")
+		return
+	}
+
 	toEmail := user.Email
 
 	code := uuid.Must(uuid.NewV4())
@@ -131,6 +196,8 @@ func ForgotPasswordHandler(w http.ResponseWriter, r *http.Request) {
 	)
 
 	utils.SendMail(sub, msg, toEmail)
+
+	log.Info(fmt.Sprintf("Successfully sent forgot password mail to %s", toEmail))
 }
 
 // ResetPasswordHandler password reset handler
@@ -165,6 +232,9 @@ func ResetPasswordHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(response)
+		log.Info("Unable to reset password.")
 	}
+
 	w.WriteHeader(http.StatusOK)
+	log.Info("Password reset success.")
 }
