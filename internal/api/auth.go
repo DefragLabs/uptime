@@ -133,7 +133,6 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 // ForgotPasswordHandler sends forgot password email.
 func ForgotPasswordHandler(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
 	decoder := json.NewDecoder(r.Body)
 	var forgotPasswordForm forms.ForgotPasswordForm
 	err := decoder.Decode(&forgotPasswordForm)
@@ -185,7 +184,7 @@ func ForgotPasswordHandler(w http.ResponseWriter, r *http.Request) {
 	)
 
 	utils.SendMail(sub, msg, toEmail)
-
+	w.WriteHeader(http.StatusOK)
 	log.Infof("Successfully sent forgot password mail to %s", toEmail)
 }
 
@@ -212,15 +211,8 @@ func ResetPasswordHandler(w http.ResponseWriter, r *http.Request) {
 
 		utils.SendMail(sub, msg, user.Email)
 	} else {
-		errorVal := make(map[string]string)
-		errorVal["message"] = "Password cannot be reset. Please try again."
-		response := Response{
-			Success: false,
-			Data:    nil,
-			Error:   errorVal,
-		}
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(response)
+		writeErrorResponse(w, "Password cannot be reset. Please try again.")
+
 		log.Info("Unable to reset password.")
 	}
 
