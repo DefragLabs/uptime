@@ -54,7 +54,7 @@ func AddMonitoringURLHandler(w http.ResponseWriter, r *http.Request) {
 // GetMonitoringURLHandler api returns the monitoring urls configured
 func GetMonitoringURLHandler(w http.ResponseWriter, r *http.Request) {
 	authToken := r.Header.Get("Authorization")
-	_, authErr := db.ValidateJWT(authToken)
+	user, authErr := db.ValidateJWT(authToken)
 
 	if authErr != nil {
 		writeErrorResponse(w, "Authentication failed")
@@ -63,7 +63,7 @@ func GetMonitoringURLHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	datastore := db.New()
-	monitoringURLS := datastore.GetMonitoringURLS()
+	monitoringURLS := datastore.GetMonitoringURLSByUserID(user.ID)
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(monitoringURLS)
 }

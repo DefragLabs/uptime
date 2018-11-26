@@ -146,6 +146,39 @@ func (datastore *Datastore) GetMonitoringURLS() []MonitorURL {
 	return monitorURLS
 }
 
+// GetMonitoringURLSByUserID gets all URL's for user.
+func (datastore *Datastore) GetMonitoringURLSByUserID(userID string) []MonitorURL {
+	dbClient := datastore.Client
+	collection := dbClient.Database(datastore.DatabaseName).Collection(MonitorURLCollection)
+
+	count, _ := collection.Count(
+		context.Background(),
+		bson.NewDocument(),
+	)
+
+	monitorURLS := make([]MonitorURL, count)
+	cursor, _ := collection.Find(
+		context.Background(),
+		bson.NewDocument(
+			bson.EC.String("userID", userID),
+		),
+	)
+
+	i := 0
+	for cursor.Next(context.Background()) {
+		monitorURL := MonitorURL{}
+		err := cursor.Decode(&monitorURL)
+		if err != nil {
+			log.Fatal("error while parsing cursor for monitor urls")
+		}
+
+		monitorURLS[i] = monitorURL
+		i++
+	}
+
+	return monitorURLS
+}
+
 // AddMonitorDetail add monitor url detail to the db.
 func (datastore *Datastore) AddMonitorDetail(monitorURL MonitorURL, status, time, duration string) {
 	dbClient := datastore.Client
