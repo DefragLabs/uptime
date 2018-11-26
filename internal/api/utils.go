@@ -14,6 +14,7 @@ func writeErrorResponse(w http.ResponseWriter, errorMsg string) {
 		Error:   errorVal,
 	}
 
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusBadRequest)
 	json.NewEncoder(w).Encode(response)
 }

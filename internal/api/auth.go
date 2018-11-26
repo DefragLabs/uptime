@@ -184,6 +184,8 @@ func ForgotPasswordHandler(w http.ResponseWriter, r *http.Request) {
 	)
 
 	utils.SendMail(sub, msg, toEmail)
+
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 	log.Infof("Successfully sent forgot password mail to %s", toEmail)
 }
@@ -216,6 +218,7 @@ func ResetPasswordHandler(w http.ResponseWriter, r *http.Request) {
 		log.Info("Unable to reset password.")
 	}
 
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 	log.Info("Password reset success.")
 }

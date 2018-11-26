@@ -47,6 +47,8 @@ func AddMonitoringURLHandler(w http.ResponseWriter, r *http.Request) {
 	monitoringURL := datastore.AddMonitoringURL(monitorURLForm)
 
 	log.Info(fmt.Sprintf("Added monitoring url %s", monitorURLForm.URL))
+
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(monitoringURL)
 }
@@ -64,6 +66,8 @@ func GetMonitoringURLHandler(w http.ResponseWriter, r *http.Request) {
 
 	datastore := db.New()
 	monitoringURLS := datastore.GetMonitoringURLSByUserID(user.ID)
+
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(monitoringURLS)
 }
