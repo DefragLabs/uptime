@@ -45,7 +45,7 @@ func StartScheduler() {
 		ticker := time.Tick(frequency)
 
 		for {
-			time.Sleep(time.Duration(60 * time.Second))
+			time.Sleep(time.Duration(5600 * time.Second))
 			c <- <-ticker
 		}
 	}()
