@@ -3,6 +3,7 @@ package forms
 // MonitorURLForm struct represents a row in db.
 type MonitorURLForm struct {
 	ID        string `bson:"_id" json:"id,omitempty"`
+	UserID    string `bson:"userID" json:"-"`
 	Protocol  string `bson:"protocol" json:"protocol"`
 	URL       string `bson:"url" json:"url"`
 	Frequency int32  `bson:"frequency" json:"frequency"`
