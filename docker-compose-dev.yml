@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: docker/api/Dockerfile
     ports:
-      - '9001:8080'
+      - '8080:8080'
     env_file:
       - ~/web-variables.env
 
