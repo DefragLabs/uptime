@@ -133,43 +133,31 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 // ForgotPasswordHandler sends forgot password email.
 func ForgotPasswordHandler(w http.ResponseWriter, r *http.Request) {
+	authToken := r.Header.Get("Authorization")
+	user, authErr := db.ValidateJWT(authToken)
+
 	w.WriteHeader(http.StatusOK)
 	decoder := json.NewDecoder(r.Body)
 	var forgotPasswordForm forms.ForgotPasswordForm
 	err := decoder.Decode(&forgotPasswordForm)
 
-	error := false
-	errorMsg := ""
-
 	if err != nil {
-		error = true
-		errorMsg = "Invalid input format"
+		writeErrorResponse(w, "Invalid input format")
+
+		log.Info("Invalid input format for forgot password")
+		return
 	}
 
-	datastore := db.New()
-	user := datastore.GetUserByEmail(forgotPasswordForm.Email)
+	if authErr != nil {
+		writeErrorResponse(w, authErr.Error())
 
-	if user.ID == "" {
-		error = true
-		errorMsg = "User not found"
+		log.Info("Auth error")
+		return
 	}
 	validationMessage := forgotPasswordForm.Validate()
 	if validationMessage != "" {
-		error = true
-		errorMsg = validationMessage
-	}
+		writeErrorResponse(w, validationMessage)
 
-	if error {
-		errorVal := make(map[string]string)
-		errorVal["message"] = errorMsg
-		response := Response{
-			Success: false,
-			Data:    nil,
-			Error:   errorVal,
-		}
-
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(response)
 		log.Info("Unable to process forgot password.")
 		return
 	}
@@ -181,6 +169,7 @@ func ForgotPasswordHandler(w http.ResponseWriter, r *http.Request) {
 
 	resetPassword := db.ResetPassword{UserID: user.ID, Code: hexCode}
 
+	datastore := db.New()
 	datastore.AddResetPassword(resetPassword)
 
 	baseURL, _ := url.Parse(fmt.Sprintf("http://%s", r.Host))
