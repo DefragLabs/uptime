@@ -1,6 +1,5 @@
 import os
 
-import requests
 from fabric.api import task, run, abort, settings, local
 from fabric.context_managers import cd
 from fabric.contrib import files
