@@ -4,6 +4,8 @@ package db
 type MonitorURL struct {
 	ID string `bson:"_id" json:"id,omitempty"`
 
+	UserID string `bson:"userID" json:"userID"`
+
 	// Http protocol (http/https)
 	Protocol string `bson:"protocol" json:"protocol"`
 
