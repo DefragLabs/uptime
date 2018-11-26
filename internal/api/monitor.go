@@ -12,6 +12,15 @@ import (
 
 // AddMonitoringURLHandler api lets an user add an healthcheck url.
 func AddMonitoringURLHandler(w http.ResponseWriter, r *http.Request) {
+	authToken := r.Header.Get("Authorization")
+	_, authErr := db.ValidateJWT(authToken)
+
+	if authErr != nil {
+		writeErrorResponse(w, "Authentication failed")
+
+		return
+	}
+
 	w.WriteHeader(http.StatusCreated)
 
 	decoder := json.NewDecoder(r.Body)
@@ -44,6 +53,15 @@ func AddMonitoringURLHandler(w http.ResponseWriter, r *http.Request) {
 
 // GetMonitoringURLHandler api returns the monitoring urls configured
 func GetMonitoringURLHandler(w http.ResponseWriter, r *http.Request) {
+	authToken := r.Header.Get("Authorization")
+	_, authErr := db.ValidateJWT(authToken)
+
+	if authErr != nil {
+		writeErrorResponse(w, "Authentication failed")
+
+		return
+	}
+
 	w.WriteHeader(http.StatusOK)
 
 	datastore := db.New()
