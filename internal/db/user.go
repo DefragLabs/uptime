@@ -1,11 +1,15 @@
 package db
 
 import (
+	"errors"
+	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/defraglabs/uptime/internal/forms"
 	"github.com/dgrijalva/jwt-go"
+	log "github.com/sirupsen/logrus"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -42,9 +46,10 @@ func RegisterUser(userRegisterForm forms.UserRegisterForm) User {
 func GetJWT(user User, password string) string {
 	if checkPasswordHash(password, user.PasswordHash) == true {
 		token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-			"email": user.Email,
-			"exp":   time.Now().Add(time.Hour * 168).Unix(),
-			"iat":   time.Now().Unix(),
+			"userID": user.ID,
+			"email":  user.Email,
+			"exp":    time.Now().Add(time.Hour * 168).Unix(),
+			"iat":    time.Now().Unix(),
 		})
 
 		// Sign and get the complete encoded token as a string using the secret
@@ -53,6 +58,56 @@ func GetJWT(user User, password string) string {
 	}
 
 	panic("Password check failed")
+}
+
+// ValidateJWT validates the provided JWT and returns the corresponding user.
+func ValidateJWT(authToken string) (User, error) {
+	splitAuthToken := strings.Split(authToken, " ")
+
+	if len(splitAuthToken) != 2 {
+		return User{}, errors.New("invalid auth header")
+	}
+
+	authType, tokenString := splitAuthToken[0], splitAuthToken[1]
+
+	if authType != "JWT" {
+		return User{}, errors.New("invalid auth type")
+	}
+
+	userID := verifyJWT(tokenString)
+	if userID != "" {
+		datastore := New()
+		user := datastore.GetUserByID(userID)
+
+		if user.ID == "" {
+			return User{}, errors.New("user not found")
+		}
+
+		return user, nil
+	}
+
+	return User{}, errors.New("authorization failed")
+}
+
+// verifyJWT verifies the token & returns the payload.
+func verifyJWT(tokenString string) string {
+	hmacSampleSecret := []byte(os.Getenv("JWT_SECRET"))
+	token, _ := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		// Don't forget to validate the alg is what you expect:
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			log.Info(nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"]))
+		}
+
+		return hmacSampleSecret, nil
+	})
+
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		fmt.Println(claims)
+		return claims["userID"].(string)
+	}
+
+	log.Warn("Unable to decode jwt token")
+	return ""
 }
 
 // PasswordReset validates & resets the password.
