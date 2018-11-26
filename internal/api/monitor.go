@@ -18,30 +18,17 @@ func AddMonitoringURLHandler(w http.ResponseWriter, r *http.Request) {
 	var monitorURLForm forms.MonitorURLForm
 	err := decoder.Decode(&monitorURLForm)
 	if err != nil {
-		panic(err)
-	}
+		writeErrorResponse(w, "Invalid input format")
 
-	error := false
-	errorMsg := ""
+		log.Info("Invalid input format for forgot password")
+		return
+	}
 
 	validationMessage := monitorURLForm.Validate()
 	if validationMessage != "" {
-		error = true
-		errorMsg = validationMessage
-	}
+		writeErrorResponse(w, validationMessage)
 
-	if error {
-		errorVal := make(map[string]string)
-		errorVal["message"] = errorMsg
-		response := Response{
-			Success: false,
-			Data:    nil,
-			Error:   errorVal,
-		}
-
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(response)
-		log.Info(fmt.Sprintf("Unable to add monitoring url %s", monitorURLForm.URL))
+		log.Info("Validation failed while adding monitoring URL.")
 		return
 	}
 
