@@ -133,9 +133,6 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 // ForgotPasswordHandler sends forgot password email.
 func ForgotPasswordHandler(w http.ResponseWriter, r *http.Request) {
-	authToken := r.Header.Get("Authorization")
-	user, authErr := db.ValidateJWT(authToken)
-
 	w.WriteHeader(http.StatusOK)
 	decoder := json.NewDecoder(r.Body)
 	var forgotPasswordForm forms.ForgotPasswordForm
@@ -148,17 +145,21 @@ func ForgotPasswordHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if authErr != nil {
-		writeErrorResponse(w, authErr.Error())
-
-		log.Info("Auth error")
-		return
-	}
 	validationMessage := forgotPasswordForm.Validate()
 	if validationMessage != "" {
 		writeErrorResponse(w, validationMessage)
 
 		log.Info("Unable to process forgot password.")
+		return
+	}
+
+	datastore := db.New()
+	user := datastore.GetUserByEmail(forgotPasswordForm.Email)
+
+	if user.ID == "" {
+		writeErrorResponse(w, "User not found")
+
+		log.Infof("User with email %s not found", forgotPasswordForm.Email)
 		return
 	}
 
@@ -169,7 +170,6 @@ func ForgotPasswordHandler(w http.ResponseWriter, r *http.Request) {
 
 	resetPassword := db.ResetPassword{UserID: user.ID, Code: hexCode}
 
-	datastore := db.New()
 	datastore.AddResetPassword(resetPassword)
 
 	baseURL, _ := url.Parse(fmt.Sprintf("http://%s", r.Host))
