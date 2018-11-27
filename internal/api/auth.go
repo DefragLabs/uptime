@@ -131,6 +131,24 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
+// LogoutHandler revokes the jwt token.
+func LogoutHandler(w http.ResponseWriter, r *http.Request) {
+	authToken := r.Header.Get("Authorization")
+	_, authErr := db.ValidateJWT(authToken)
+
+	if authErr != nil {
+		writeErrorResponse(w, "Authentication failed")
+
+		return
+	}
+
+	if db.RevokeToken(authToken) {
+		w.WriteHeader(http.StatusNoContent)
+	} else {
+		writeErrorResponse(w, "Unable to revoke the token")
+	}
+}
+
 // ForgotPasswordHandler sends forgot password email.
 func ForgotPasswordHandler(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
