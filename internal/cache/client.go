@@ -8,7 +8,8 @@ import (
 	"github.com/go-redis/redis"
 )
 
-func getClient() *redis.Client {
+// GetClient returns redis client.
+func GetClient() *redis.Client {
 	redisHost := os.Getenv("REDIS_HOST")
 	redisDbNo := os.Getenv("REDIS_DB_NUMBER")
 	redisPort := os.Getenv("REDIS_PORT")

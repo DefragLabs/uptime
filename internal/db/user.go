@@ -1,14 +1,17 @@
 package db
 
 import (
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"os"
 	"strings"
 	"time"
 
+	"github.com/defraglabs/uptime/internal/cache"
 	"github.com/defraglabs/uptime/internal/forms"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/gofrs/uuid"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -45,11 +48,15 @@ func RegisterUser(userRegisterForm forms.UserRegisterForm) User {
 // GetJWT validates user with password and returns JWT token.
 func GetJWT(user User, password string) string {
 	if checkPasswordHash(password, user.PasswordHash) == true {
+		code := uuid.Must(uuid.NewV4())
+		hexCode := hex.EncodeToString(code.Bytes())
+
 		token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 			"userID": user.ID,
 			"email":  user.Email,
 			"exp":    time.Now().Add(time.Hour * 168).Unix(),
 			"iat":    time.Now().Unix(),
+			"jti":    hexCode,
 		})
 
 		// Sign and get the complete encoded token as a string using the secret
@@ -60,21 +67,44 @@ func GetJWT(user User, password string) string {
 	panic("Password check failed")
 }
 
-// ValidateJWT validates the provided JWT and returns the corresponding user.
-func ValidateJWT(authToken string) (User, error) {
+func splitAuthToken(authToken string) ([]string, error) {
 	splitAuthToken := strings.Split(authToken, " ")
 
 	if len(splitAuthToken) != 2 {
-		return User{}, errors.New("invalid auth header")
+		var emptyArray []string
+		return emptyArray, errors.New("invalid auth header")
 	}
 
-	authType, tokenString := splitAuthToken[0], splitAuthToken[1]
+	return splitAuthToken, nil
+}
+
+// ValidateJWT validates the provided JWT and returns the corresponding user.
+func ValidateJWT(authToken string) (User, error) {
+	authTokenArray, splitErr := splitAuthToken(authToken)
+
+	if splitErr != nil {
+		return User{}, errors.New(splitErr.Error())
+	}
+
+	authType, tokenString := authTokenArray[0], authTokenArray[1]
 
 	if authType != "JWT" {
 		return User{}, errors.New("invalid auth type")
 	}
 
-	userID := verifyJWT(tokenString)
+	claims, jwtDecodeErr := verifyJWT(tokenString)
+
+	if jwtDecodeErr != nil {
+		return User{}, errors.New(jwtDecodeErr.Error())
+	}
+
+	jti := claims["jti"].(string)
+
+	if isTokenRevoked(jti) {
+		return User{}, errors.New("token has been revoked")
+	}
+	userID := claims["userID"].(string)
+
 	if userID != "" {
 		datastore := New()
 		user := datastore.GetUserByID(userID)
@@ -89,8 +119,41 @@ func ValidateJWT(authToken string) (User, error) {
 	return User{}, errors.New("authorization failed")
 }
 
+func isTokenRevoked(jti string) bool {
+	cacheClient := cache.GetClient()
+	val, err := cacheClient.Get(jti).Result()
+
+	if err != nil || val == "" {
+		return false
+	}
+	return true
+}
+
+// RevokeToken adds the token to redis blacklist.
+// The token expires from the cache at `exp` + int32 of the token.
+func RevokeToken(authToken string) bool {
+	authTokenArray, _ := splitAuthToken(authToken)
+
+	tokenString := authTokenArray[1]
+	claims, tokenDecodeErr := verifyJWT(tokenString)
+
+	if tokenDecodeErr != nil {
+		return false
+	}
+
+	exp := claims["exp"].(int32)
+	exp += 1000
+
+	jti := claims["jti"].(string)
+
+	cacheClient := cache.GetClient()
+	cacheClient.Set(jti, tokenString, time.Duration(exp))
+
+	return true
+}
+
 // verifyJWT verifies the token & returns the payload.
-func verifyJWT(tokenString string) string {
+func verifyJWT(tokenString string) (jwt.MapClaims, error) {
 	hmacSampleSecret := []byte(os.Getenv("JWT_SECRET"))
 	token, _ := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		// Don't forget to validate the alg is what you expect:
@@ -103,11 +166,11 @@ func verifyJWT(tokenString string) string {
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		fmt.Println(claims)
-		return claims["userID"].(string)
+		return claims, nil
 	}
 
 	log.Warn("Unable to decode jwt token")
-	return ""
+	return jwt.MapClaims{}, errors.New("Unable to decode token")
 }
 
 // PasswordReset validates & resets the password.
