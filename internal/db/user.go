@@ -123,7 +123,7 @@ func isTokenRevoked(jti string) bool {
 	cacheClient := cache.GetClient()
 	val, err := cacheClient.Get(jti).Result()
 
-	if err != nil || val == "" {
+	if err != nil || val != "revoked" {
 		return false
 	}
 	return true
@@ -141,13 +141,15 @@ func RevokeToken(authToken string) bool {
 		return false
 	}
 
-	exp := claims["exp"].(int32)
+	exp := int64(claims["exp"].(float64))
 	exp += 1000
 
 	jti := claims["jti"].(string)
 
 	cacheClient := cache.GetClient()
-	cacheClient.Set(jti, tokenString, time.Duration(exp))
+
+	duration := exp - time.Now().Unix()
+	cacheClient.Set(jti, "revoked", time.Duration(duration)*time.Second)
 
 	return true
 }
@@ -165,7 +167,6 @@ func verifyJWT(tokenString string) (jwt.MapClaims, error) {
 	})
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		fmt.Println(claims)
 		return claims, nil
 	}
 
