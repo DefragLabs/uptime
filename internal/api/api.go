@@ -3,6 +3,7 @@ package api
 import (
 	"net/http"
 
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 )
 
@@ -29,5 +30,9 @@ func StartServer() {
 	monitoringDetailsRoutes(router)
 	authRoutes(router)
 
-	http.ListenAndServe(":8080", router)
+	http.ListenAndServe(":8080", handlers.CORS(
+		handlers.AllowedHeaders([]string{"Content-Type", "Authorization"}),
+		handlers.AllowedMethods([]string{"GET", "POST", "PUT", "HEAD", "OPTIONS"}),
+		handlers.AllowedOrigins([]string{"*"}))(router),
+	)
 }
