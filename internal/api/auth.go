@@ -26,14 +26,12 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	errorMsg := ""
 	if err != nil {
 		writeErrorResponse(w, "Invalid input format")
-
 		return
 	}
 
 	validationMessage := userRegisterForm.Validate()
 	if validationMessage != "" {
 		writeErrorResponse(w, errorMsg)
-
 		return
 	}
 
@@ -42,7 +40,6 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	if user.ID != "" {
 		errorMsg = fmt.Sprintf("Email %s already registered", user.Email)
 		writeErrorResponse(w, errorMsg)
-
 		return
 	}
 
@@ -50,7 +47,6 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 
 	if companyUser.ID != "" {
 		writeErrorResponse(w, fmt.Sprintf("Company %s already exists", companyUser.CompanyName))
-
 		return
 	}
 
@@ -74,12 +70,15 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	var userLoginForm forms.UserLoginForm
 	err := decoder.Decode(&userLoginForm)
 
-	error := false
-	errorMsg := ""
-
 	if err != nil {
-		error = true
-		errorMsg = "Invalid input format"
+		writeErrorResponse(w, "Invalid input format")
+		return
+	}
+
+	validationMessage := userLoginForm.Validate()
+	if validationMessage != "" {
+		writeErrorResponse(w, validationMessage)
+		return
 	}
 
 	datastore := db.New()
@@ -87,28 +86,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	user := datastore.GetUserByEmail(userLoginForm.Email)
 	fmt.Print(user, user.ID)
 	if user.ID == "" {
-		error = true
-		errorMsg = "User not found"
-	}
-
-	validationMessage := userLoginForm.Validate()
-	if validationMessage != "" {
-		error = true
-		errorMsg = validationMessage
-	}
-
-	if error {
-		errorVal := make(map[string]string)
-		errorVal["message"] = errorMsg
-		response := Response{
-			Success: false,
-			Data:    nil,
-			Error:   errorVal,
-		}
-
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(response)
-		log.Info("Login failed")
+		writeErrorResponse(w, "User not found")
 		return
 	}
 
