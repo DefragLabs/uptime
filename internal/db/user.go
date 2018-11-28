@@ -50,7 +50,7 @@ func RegisterUser(userRegisterForm forms.UserRegisterForm) User {
 }
 
 // GetJWT validates user with password and returns JWT token.
-func GetJWT(user User, password string) string {
+func GetJWT(user User, password string) (string, error) {
 	if checkPasswordHash(password, user.PasswordHash) == true {
 		code := uuid.Must(uuid.NewV4())
 		hexCode := hex.EncodeToString(code.Bytes())
@@ -65,10 +65,10 @@ func GetJWT(user User, password string) string {
 
 		// Sign and get the complete encoded token as a string using the secret
 		tokenString, _ := token.SignedString([]byte(os.Getenv("JWT_SECRET")))
-		return tokenString
+		return tokenString, nil
 	}
 
-	panic("Password check failed")
+	return "", errors.New("invalid credentials")
 }
 
 func splitAuthToken(authToken string) ([]string, error) {

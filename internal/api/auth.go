@@ -58,6 +58,23 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	datastore.CreateUser(newUser)
 
 	log.Infof("Registration successful with email %s", newUser.Email)
+	jwt, authErr := db.GetJWT(user, userRegisterForm.Password)
+
+	if authErr != nil {
+		writeErrorResponse(w, authErr.Error())
+		return
+	}
+
+	data := make(map[string]string)
+	data["token"] = jwt
+
+	response := Response{
+		Success: true,
+		Data:    data,
+		Error:   nil,
+	}
+
+	json.NewEncoder(w).Encode(response)
 	w.WriteHeader(http.StatusCreated)
 }
 
@@ -90,7 +107,13 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	jwt := db.GetJWT(user, userLoginForm.Password)
+	jwt, authErr := db.GetJWT(user, userLoginForm.Password)
+
+	if authErr != nil {
+		writeErrorResponse(w, authErr.Error())
+		return
+	}
+
 	data := make(map[string]string)
 	data["token"] = jwt
 
