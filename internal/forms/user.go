@@ -2,10 +2,12 @@ package forms
 
 // UserRegisterForm - User register form struct
 type UserRegisterForm struct {
-	FirstName string `bson:"firstName" json:"firstName"`
-	LastName  string `bson:"lastName" json:"lastName"`
-	Email     string `bson:"email" json:"email"`
-	Password  string `bson:"password" json:"password"`
+	FirstName   string `bson:"firstName" json:"firstName"`
+	LastName    string `bson:"lastName" json:"lastName"`
+	PhoneNumber string `bson:"phoneNumber" json:"phoneNumber"`
+	CompanyName string `bson:"CompanyName" json:"CompanyName"`
+	Email       string `bson:"email" json:"email"`
+	Password    string `bson:"password" json:"password"`
 }
 
 // Validate user registration form.
@@ -18,6 +20,8 @@ func (userRegisterForm UserRegisterForm) Validate() string {
 		return "email is required"
 	} else if userRegisterForm.Password == "" {
 		return "password is required"
+	} else if userRegisterForm.CompanyName == "" {
+		return "company name is required"
 	}
 
 	return ""

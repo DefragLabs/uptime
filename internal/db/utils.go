@@ -87,6 +87,22 @@ func (datastore *Datastore) GetUserByEmail(email string) User {
 	return user
 }
 
+// GetUserByComapnyName from db.
+func (datastore *Datastore) GetUserByComapnyName(companyName string) User {
+	dbClient := datastore.Client
+	collection := dbClient.Database(datastore.DatabaseName).Collection(UsersCollection)
+
+	user := User{}
+	collection.FindOne(
+		context.Background(),
+		bson.NewDocument(
+			bson.EC.String("companyName", companyName),
+		),
+	).Decode(&user)
+
+	return user
+}
+
 // AddMonitoringURL function persists the value in db.
 func (datastore *Datastore) AddMonitoringURL(monitorURLForm forms.MonitorURLForm) interface{} {
 	dbClient := datastore.Client

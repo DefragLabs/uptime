@@ -21,6 +21,8 @@ type User struct {
 	ID           string `bson:"_id" json:"id,omitempty"`
 	FirstName    string `bson:"firstName" json:"firstName"`
 	LastName     string `bson:"lastName" json:"lastName"`
+	PhoneNumber  string `bson:"phoneNumber" json:"phoneNumber"`
+	CompanyName  string `bson:"CompanyName" json:"CompanyName"`
 	Email        string `bson:"email" json:"email"`
 	PasswordHash string `bson:"passwordHash" json:"password"`
 }
@@ -41,6 +43,8 @@ func RegisterUser(userRegisterForm forms.UserRegisterForm) User {
 		LastName:     userRegisterForm.LastName,
 		Email:        userRegisterForm.Email,
 		PasswordHash: string(passwordHash),
+		PhoneNumber:  userRegisterForm.PhoneNumber,
+		CompanyName:  userRegisterForm.CompanyName,
 	}
 	return user
 }

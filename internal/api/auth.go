@@ -23,38 +23,34 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	var userRegisterForm forms.UserRegisterForm
 	err := decoder.Decode(&userRegisterForm)
 
-	error := false
 	errorMsg := ""
 	if err != nil {
-		error = true
-		errorMsg = "Invalid input format"
+		writeErrorResponse(w, "Invalid input format")
+
+		return
+	}
+
+	validationMessage := userRegisterForm.Validate()
+	if validationMessage != "" {
+		writeErrorResponse(w, errorMsg)
+
+		return
 	}
 
 	datastore := db.New()
 	user := datastore.GetUserByEmail(userRegisterForm.Email)
 	if user.ID != "" {
-		error = true
 		errorMsg = fmt.Sprintf("Email %s already registered", user.Email)
+		writeErrorResponse(w, errorMsg)
+
+		return
 	}
 
-	validationMessage := userRegisterForm.Validate()
-	if validationMessage != "" {
-		error = true
-		errorMsg = validationMessage
-	}
+	companyUser := datastore.GetUserByComapnyName(userRegisterForm.CompanyName)
 
-	if error {
-		errorVal := make(map[string]string)
-		errorVal["message"] = errorMsg
-		response := Response{
-			Success: false,
-			Data:    nil,
-			Error:   errorVal,
-		}
+	if companyUser.ID != "" {
+		writeErrorResponse(w, fmt.Sprintf("Company %s already exists", companyUser.CompanyName))
 
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(response)
-		log.Info("Registration failed")
 		return
 	}
 
