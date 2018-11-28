@@ -4,8 +4,8 @@ import (
 	"github.com/mongodb/mongo-go-driver/bson/objectid"
 )
 
-// Notification struct represents a row in db.
-type Notification struct {
+// Integration struct represents a row in db.
+type Integration struct {
 	ID         objectid.ObjectID `bson:"-,Skip" json:"id,omitempty"`
 	Type       string            `bson:"type" json:"type"`
 	EmailID    string            `bson:"emailID" json:"emailID"`
