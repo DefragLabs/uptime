@@ -317,3 +317,17 @@ func (datastore *Datastore) GetIntegrationByUserID(userID string, integrationID 
 
 	return integration
 }
+
+// DeleteIntegration delete's a given integration
+func (datastore *Datastore) DeleteIntegration(userID string, integrationID string) {
+	dbClient := datastore.Client
+	collection := dbClient.Database(datastore.DatabaseName).Collection(IntegrationCollection)
+
+	collection.FindOneAndDelete(
+		context.Background(),
+		bson.NewDocument(
+			bson.EC.String("userID", userID),
+			bson.EC.String("_id", integrationID),
+		),
+	)
+}

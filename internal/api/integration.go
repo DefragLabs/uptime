@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/defraglabs/uptime/internal/db"
@@ -98,8 +97,19 @@ func GetIntegrationHandler(w http.ResponseWriter, r *http.Request) {
 // DeleteIntegrationHandler removes a configured integration
 func DeleteIntegrationHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-
 	integrationID := vars["integrationID"]
-	fmt.Println(integrationID)
+
+	authToken := r.Header.Get("Authorization")
+	user, authErr := db.ValidateJWT(authToken)
+
+	if authErr != nil {
+		writeErrorResponse(w, "Authentication failed")
+
+		return
+	}
+
+	datastore := db.New()
+	datastore.DeleteIntegration(user.ID, integrationID)
+
 	log.Info("Integration removed successfully.")
 }
