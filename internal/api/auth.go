@@ -68,14 +68,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	data := make(map[string]string)
 	data["token"] = jwt
 
-	response := Response{
-		Success: true,
-		Data:    data,
-		Error:   nil,
-	}
-
-	json.NewEncoder(w).Encode(response)
-	w.WriteHeader(http.StatusCreated)
+	writeSuccessResponse(w, data, http.StatusCreated)
 }
 
 // LoginHandler validates the password & returns the JWT token.
@@ -117,15 +110,9 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	data := make(map[string]string)
 	data["token"] = jwt
 
-	response := Response{
-		Success: true,
-		Data:    data,
-		Error:   nil,
-	}
-	w.WriteHeader(http.StatusOK)
+	writeSuccessResponse(w, data, http.StatusOK)
 
 	log.Info("Login successful")
-	json.NewEncoder(w).Encode(response)
 }
 
 // LogoutHandler revokes the jwt token.
