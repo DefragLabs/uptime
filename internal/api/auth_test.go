@@ -13,23 +13,24 @@ import (
 	"github.com/defraglabs/uptime/internal/forms"
 )
 
-func clearDatabase() {
+func clearUsersCollection() {
 	datastore := db.New()
 	datastore.Client.Database(datastore.DatabaseName).Collection(db.UsersCollection).Drop(context.Background())
 }
 
 func TestRegisterHandler(t *testing.T) {
 	os.Setenv("MONGO_DATABASE_NAME", "uptime_test")
-	defer clearDatabase()
+	defer clearUsersCollection()
 
 	userRegisterForm := forms.UserRegisterForm{
-		FirstName: "Alice",
-		LastName:  "Wonderland",
-		Email:     "alice@sample.com",
-		Password:  "test@123",
+		FirstName:   "Alice",
+		LastName:    "Wonderland",
+		Email:       "alice@sample.com",
+		Password:    "test@123",
+		CompanyName: "skynet",
 	}
 	byte, _ := json.Marshal(userRegisterForm)
-	req, err := http.NewRequest("GET", "localhost:8080/register", bytes.NewBuffer(byte))
+	req, err := http.NewRequest("GET", "localhost:8080/api/auth/register", bytes.NewBuffer(byte))
 
 	if err != nil {
 		t.Errorf("Unable to create a new request")
@@ -44,5 +45,14 @@ func TestRegisterHandler(t *testing.T) {
 
 	if res.StatusCode != http.StatusCreated {
 		t.Errorf("expected status CREATED, got %v", res.StatusCode)
+	}
+
+	response := Response{}
+	json.NewDecoder(res.Body).Decode(&response)
+
+	if response.Success == false {
+		t.Errorf("response success is false")
+	} else if response.Data["token"] == "" {
+		t.Errorf("token not found in the response")
 	}
 }

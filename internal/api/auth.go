@@ -31,7 +31,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 
 	validationMessage := userRegisterForm.Validate()
 	if validationMessage != "" {
-		writeErrorResponse(w, errorMsg)
+		writeErrorResponse(w, validationMessage)
 		return
 	}
 
@@ -58,7 +58,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	datastore.CreateUser(newUser)
 
 	log.Infof("Registration successful with email %s", newUser.Email)
-	jwt, authErr := db.GetJWT(user, userRegisterForm.Password)
+	jwt, authErr := db.GetJWT(newUser, userRegisterForm.Password)
 
 	if authErr != nil {
 		writeErrorResponse(w, authErr.Error())
