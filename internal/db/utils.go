@@ -172,7 +172,9 @@ func (datastore *Datastore) GetMonitoringURLSByUserID(userID string) []MonitorUR
 
 	count, _ := collection.Count(
 		context.Background(),
-		bson.NewDocument(),
+		bson.NewDocument(
+			bson.EC.String("userID", userID),
+		),
 	)
 
 	monitorURLS := make([]MonitorURL, count)
