@@ -48,9 +48,7 @@ func AddIntegrationHandler(w http.ResponseWriter, r *http.Request) {
 
 	log.Info("Integration added successfully.")
 
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(integration)
+	writeSuccessStructResponse(w, integration, http.StatusCreated)
 }
 
 // GetIntegrationsHandler gets all integrations by the logged in user.
@@ -67,9 +65,7 @@ func GetIntegrationsHandler(w http.ResponseWriter, r *http.Request) {
 	datastore := db.New()
 	integrations := datastore.GetIntegrationsByUserID(user.ID)
 
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(integrations)
+	writeSuccessStructResponse(w, integrations, http.StatusOK)
 }
 
 // GetIntegrationHandler gets a specific integration
@@ -89,9 +85,7 @@ func GetIntegrationHandler(w http.ResponseWriter, r *http.Request) {
 	datastore := db.New()
 	integration := datastore.GetIntegrationByUserID(user.ID, integrationID)
 
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(integration)
+	writeSuccessStructResponse(w, integration, http.StatusOK)
 }
 
 // DeleteIntegrationHandler removes a configured integration
@@ -111,5 +105,7 @@ func DeleteIntegrationHandler(w http.ResponseWriter, r *http.Request) {
 	datastore := db.New()
 	datastore.DeleteIntegration(user.ID, integrationID)
 
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusNoContent)
 	log.Info("Integration removed successfully.")
 }
