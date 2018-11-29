@@ -21,6 +21,9 @@ const (
 	// MonitorURLCollection is the name of the collection which contains data of
 	// monitor URL's.
 	MonitorURLCollection = "monitorURL"
+
+	// IntegrationCollection stores all the integrations configured by an user
+	IntegrationCollection = "integration"
 )
 
 // GenerateObjectID generates a new objectid.
@@ -246,4 +249,17 @@ func (datastore *Datastore) GetResetPassword(uid, code string) ResetPassword {
 	).Decode(&resetPassword)
 
 	return resetPassword
+}
+
+// AddIntegration adds an integration to db
+func (datastore *Datastore) AddIntegration(integrationForm forms.IntegrationForm) interface{} {
+	dbClient := datastore.Client
+	collection := dbClient.Database(datastore.DatabaseName).Collection(IntegrationCollection)
+
+	collection.InsertOne(
+		context.Background(),
+		integrationForm,
+	)
+
+	return integrationForm
 }
