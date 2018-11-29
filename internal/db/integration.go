@@ -9,6 +9,6 @@ type Integration struct {
 	ID         objectid.ObjectID `bson:"-,Skip" json:"id,omitempty"`
 	UserID     string            `bson:"userID" json:"userID"`
 	Type       string            `bson:"type" json:"type"`
-	EmailID    string            `bson:"emailID" json:"emailID"`
+	Email      string            `bson:"email" json:"email"`
 	WebhookURL string            `bson:"webhookURL" json:"webhookURL"`
 }
