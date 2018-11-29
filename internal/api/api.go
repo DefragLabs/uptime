@@ -22,6 +22,13 @@ func monitoringDetailsRoutes(router *mux.Router) {
 	router.HandleFunc("/monitoring-urls", UpdateMonitoringURLHandler).Methods("PUT")
 }
 
+func integrationRoutes(router *mux.Router) {
+	router.HandleFunc("/integrations", AddIntegrationHandler).Methods("POST")
+	router.HandleFunc("/integrations", GetIntegrationsHandler).Methods("GET")
+	router.HandleFunc("/integrations/{integrationID}", GetIntegrationHandler).Methods("GET")
+	router.HandleFunc("/integrations/{integrationID}", DeleteIntegrationHandler).Methods("DELETE")
+}
+
 // StartServer Start the server.
 func StartServer() {
 	router := mux.NewRouter().PathPrefix("/api").Subrouter()
