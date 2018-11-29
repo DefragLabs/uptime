@@ -18,6 +18,14 @@
   version = "v3.2.0"
 
 [[projects]]
+  digest = "1:af43bdaaf86655a2343f113e9b293bbc16b12099eaeb223982bbe4d4c22ba14d"
+  name = "github.com/fatih/structs"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "4966fc68f5b7593aafa6cbbba2d65ec6e1416047"
+  version = "v1.1.0"
+
+[[projects]]
   digest = "1:7c2fd446293ff7799cc496d3446e674ee67902d119f244de645caf95dff1bb98"
   name = "github.com/go-redis/redis"
   packages = [
@@ -233,6 +241,7 @@
   analyzer-version = 1
   input-imports = [
     "github.com/dgrijalva/jwt-go",
+    "github.com/fatih/structs",
     "github.com/go-redis/redis",
     "github.com/gofrs/uuid",
     "github.com/gorilla/handlers",
