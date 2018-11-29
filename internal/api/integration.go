@@ -56,15 +56,43 @@ func AddIntegrationHandler(w http.ResponseWriter, r *http.Request) {
 
 // GetIntegrationsHandler gets all integrations by the logged in user.
 func GetIntegrationsHandler(w http.ResponseWriter, r *http.Request) {
+	authToken := r.Header.Get("Authorization")
+	user, authErr := db.ValidateJWT(authToken)
 
+	if authErr != nil {
+		writeErrorResponse(w, "Authentication failed")
+
+		return
+	}
+
+	datastore := db.New()
+	integrations := datastore.GetIntegrationsByUserID(user.ID)
+
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(integrations)
 }
 
 // GetIntegrationHandler gets a specific integration
 func GetIntegrationHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-
 	integrationID := vars["integrationID"]
-	fmt.Println(integrationID)
+
+	authToken := r.Header.Get("Authorization")
+	user, authErr := db.ValidateJWT(authToken)
+
+	if authErr != nil {
+		writeErrorResponse(w, "Authentication failed")
+
+		return
+	}
+
+	datastore := db.New()
+	integration := datastore.GetIntegrationByUserID(user.ID, integrationID)
+
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(integration)
 }
 
 // DeleteIntegrationHandler removes a configured integration

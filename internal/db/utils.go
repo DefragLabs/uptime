@@ -205,8 +205,6 @@ func (datastore *Datastore) AddMonitorDetail(monitorURL MonitorURL, status, time
 	dbClient := datastore.Client
 	collection := dbClient.Database(datastore.DatabaseName).Collection(MonitorURLCollection)
 
-	fmt.Println(duration)
-
 	result := MonitorResult{
 		Status:   status,
 		Duration: duration,
@@ -264,4 +262,58 @@ func (datastore *Datastore) AddIntegration(integrationForm forms.IntegrationForm
 	)
 
 	return integrationForm
+}
+
+// GetIntegrationsByUserID gets all integrations added by an user
+func (datastore *Datastore) GetIntegrationsByUserID(userID string) []Integration {
+	dbClient := datastore.Client
+	collection := dbClient.Database(datastore.DatabaseName).Collection(IntegrationCollection)
+
+	count, _ := collection.Count(
+		context.Background(),
+		bson.NewDocument(
+			bson.EC.String("userID", userID),
+		),
+	)
+
+	cursor, _ := collection.Find(
+		context.Background(),
+		bson.NewDocument(
+			bson.EC.String("userID", userID),
+		),
+	)
+
+	integrations := make([]Integration, count)
+
+	i := 0
+	for cursor.Next(context.Background()) {
+		integration := Integration{}
+		err := cursor.Decode(&integration)
+		if err != nil {
+			log.Fatal("error while parsing cursor for monitor urls")
+		}
+
+		integrations[i] = integration
+		i++
+	}
+
+	return integrations
+}
+
+// GetIntegrationByUserID gets a specific integration added by an user
+func (datastore *Datastore) GetIntegrationByUserID(userID string, integrationID string) Integration {
+	dbClient := datastore.Client
+	collection := dbClient.Database(datastore.DatabaseName).Collection(IntegrationCollection)
+
+	integration := Integration{}
+
+	collection.FindOne(
+		context.Background(),
+		bson.NewDocument(
+			bson.EC.String("userID", userID),
+			bson.EC.String("_id", integrationID),
+		),
+	).Decode(&integration)
+
+	return integration
 }
