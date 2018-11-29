@@ -41,7 +41,7 @@ func StartScheduler() {
 	log.Info("Starting scheduler")
 	c := make(chan time.Time)
 	go func() {
-		var frequency = time.Duration(100)
+		var frequency = time.Duration(1 * time.Second)
 		ticker := time.Tick(frequency)
 
 		for {
