@@ -26,7 +26,7 @@ func clearIntegrationCollection() {
 		db.IntegrationCollection).Drop(context.Background())
 }
 
-func registerTestUser(t *testing.T) string {
+func createTestUser() string {
 	userRegisterForm := forms.UserRegisterForm{
 		FirstName:   "Alice",
 		LastName:    "Wonderland",
@@ -34,29 +34,36 @@ func registerTestUser(t *testing.T) string {
 		Password:    "test@123",
 		CompanyName: "skynet",
 	}
-	byte, _ := json.Marshal(userRegisterForm)
-	req, err := http.NewRequest("GET", "localhost:8080/api/auth/register", bytes.NewBuffer(byte))
+	newUser := db.RegisterUser(userRegisterForm)
+	objectID := db.GenerateObjectID()
+	newUser.ID = objectID.Hex()
 
-	if err != nil {
-		t.Errorf("Unable to create a new request")
+	datastore := db.New()
+	datastore.CreateUser(newUser)
+	jwt, _ := db.GetJWT(newUser, userRegisterForm.Password)
+
+	return jwt
+}
+
+func addTestIntegration(userID string) string {
+	integrationForm := forms.IntegrationForm{
+		UserID: userID,
+		Type:   "email",
+		Email:  "alice@sample.com",
 	}
 
-	responseWriter := httptest.NewRecorder()
+	objectID := db.GenerateObjectID()
+	integrationForm.ID = objectID.Hex()
 
-	RegisterHandler(responseWriter, req)
+	datastore := db.New()
+	integration := datastore.AddIntegration(integrationForm)
 
-	res := responseWriter.Result()
-	defer res.Body.Close()
-
-	response := Response{}
-	json.NewDecoder(res.Body).Decode(&response)
-
-	return response.Data["token"]
+	return integration.ID
 }
 
 func TestAddIntegrationHandler(t *testing.T) {
 	os.Setenv("MONGO_DATABASE_NAME", "uptime_test")
-	jwt := registerTestUser(t)
+	jwt := createTestUser()
 	defer clearIntegrationCollection()
 
 	integrationForm := forms.IntegrationForm{
