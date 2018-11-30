@@ -2,7 +2,6 @@ package db
 
 import (
 	"context"
-	"fmt"
 	"log"
 
 	"github.com/defraglabs/uptime/internal/forms"
@@ -36,11 +35,11 @@ func (datastore *Datastore) CreateUser(user User) interface{} {
 	dbClient := datastore.Client
 	collection := dbClient.Database(datastore.DatabaseName).Collection(UsersCollection)
 
-	result, err := collection.InsertOne(
+	result, _ := collection.InsertOne(
 		context.Background(),
 		user,
 	)
-	fmt.Println(result, err)
+
 	return result.InsertedID
 }
 
