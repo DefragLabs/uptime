@@ -33,10 +33,10 @@ func writeSuccessResponse(w http.ResponseWriter, data map[string]string, status 
 }
 
 func writeSuccessStructResponse(w http.ResponseWriter, data interface{}, status int) {
-	repsonseData := structs.Map(data)
+	responseData := structs.Map(data)
 	response := StructResponse{
 		Success: true,
-		Data:    repsonseData,
+		Data:    responseData,
 		Error:   nil,
 	}
 
