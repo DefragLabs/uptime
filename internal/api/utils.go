@@ -3,8 +3,6 @@ package api
 import (
 	"encoding/json"
 	"net/http"
-
-	"github.com/fatih/structs"
 )
 
 func writeErrorResponse(w http.ResponseWriter, errorMsg string) {
@@ -32,11 +30,10 @@ func writeSuccessResponse(w http.ResponseWriter, data map[string]string, status 
 	json.NewEncoder(w).Encode(response)
 }
 
-func writeSuccessStructResponse(w http.ResponseWriter, data interface{}, status int) {
-	responseData := structs.Map(data)
+func writeSuccessStructResponse(w http.ResponseWriter, data map[string]interface{}, status int) {
 	response := StructResponse{
 		Success: true,
-		Data:    responseData,
+		Data:    data,
 		Error:   nil,
 	}
 
