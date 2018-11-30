@@ -58,7 +58,7 @@ func addTestIntegration(userID string) string {
 	datastore := db.New()
 	integration := datastore.AddIntegration(integrationForm)
 
-	return integration.ID
+	return integration.ID.String()
 }
 
 func TestAddIntegrationHandler(t *testing.T) {
