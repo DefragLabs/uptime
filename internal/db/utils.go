@@ -260,9 +260,8 @@ func (datastore *Datastore) AddIntegration(integrationForm forms.IntegrationForm
 		integrationForm,
 	)
 
-	integrationID, _ := objectid.FromHex(integrationForm.ID)
 	integration := Integration{
-		ID:         objectid.ObjectID(integrationID),
+		ID:         integrationForm.ID,
 		UserID:     integrationForm.UserID,
 		Email:      integrationForm.Email,
 		Type:       integrationForm.Type,
