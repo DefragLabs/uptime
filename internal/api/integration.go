@@ -6,6 +6,7 @@ import (
 
 	"github.com/defraglabs/uptime/internal/db"
 	"github.com/defraglabs/uptime/internal/forms"
+	"github.com/fatih/structs"
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
 )
@@ -48,7 +49,8 @@ func AddIntegrationHandler(w http.ResponseWriter, r *http.Request) {
 
 	log.Info("Integration added successfully.")
 
-	writeSuccessStructResponse(w, integration, http.StatusCreated)
+	responseData := structs.Map(integration)
+	writeSuccessStructResponse(w, responseData, http.StatusCreated)
 }
 
 // GetIntegrationsHandler gets all integrations by the logged in user.
@@ -65,7 +67,10 @@ func GetIntegrationsHandler(w http.ResponseWriter, r *http.Request) {
 	datastore := db.New()
 	integrations := datastore.GetIntegrationsByUserID(user.ID)
 
-	writeSuccessStructResponse(w, integrations, http.StatusOK)
+	data := make(map[string]interface{})
+	data["integrations"] = integrations
+
+	writeSuccessStructResponse(w, data, http.StatusOK)
 }
 
 // GetIntegrationHandler gets a specific integration
@@ -84,8 +89,8 @@ func GetIntegrationHandler(w http.ResponseWriter, r *http.Request) {
 
 	datastore := db.New()
 	integration := datastore.GetIntegrationByUserID(user.ID, integrationID)
-
-	writeSuccessStructResponse(w, integration, http.StatusOK)
+	responseData := structs.Map(integration)
+	writeSuccessStructResponse(w, responseData, http.StatusOK)
 }
 
 // DeleteIntegrationHandler removes a configured integration
