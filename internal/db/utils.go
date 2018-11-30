@@ -252,7 +252,7 @@ func (datastore *Datastore) GetResetPassword(uid, code string) ResetPassword {
 }
 
 // AddIntegration adds an integration to db
-func (datastore *Datastore) AddIntegration(integrationForm forms.IntegrationForm) interface{} {
+func (datastore *Datastore) AddIntegration(integrationForm forms.IntegrationForm) Integration {
 	dbClient := datastore.Client
 	collection := dbClient.Database(datastore.DatabaseName).Collection(IntegrationCollection)
 
@@ -261,7 +261,16 @@ func (datastore *Datastore) AddIntegration(integrationForm forms.IntegrationForm
 		integrationForm,
 	)
 
-	return integrationForm
+	integrationID, _ := objectid.FromHex(integrationForm.ID)
+	integration := Integration{
+		ID:         objectid.ObjectID(integrationID),
+		UserID:     integrationForm.UserID,
+		Email:      integrationForm.Email,
+		Type:       integrationForm.Type,
+		WebhookURL: integrationForm.WebhookURL,
+	}
+
+	return integration
 }
 
 // GetIntegrationsByUserID gets all integrations added by an user
