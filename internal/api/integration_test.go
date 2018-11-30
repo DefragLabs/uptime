@@ -26,7 +26,7 @@ func clearIntegrationCollection() {
 		db.IntegrationCollection).Drop(context.Background())
 }
 
-func createTestUser() string {
+func createTestUser() (db.User, string) {
 	userRegisterForm := forms.UserRegisterForm{
 		FirstName:   "Alice",
 		LastName:    "Wonderland",
@@ -41,8 +41,7 @@ func createTestUser() string {
 	datastore := db.New()
 	datastore.CreateUser(newUser)
 	jwt, _ := db.GetJWT(newUser, userRegisterForm.Password)
-
-	return jwt
+	return newUser, jwt
 }
 
 func addTestIntegration(userID string) string {
@@ -58,12 +57,13 @@ func addTestIntegration(userID string) string {
 	datastore := db.New()
 	integration := datastore.AddIntegration(integrationForm)
 
-	return integration.ID.String()
+	return integration.ID
 }
 
 func TestAddIntegrationHandler(t *testing.T) {
 	os.Setenv("MONGO_DATABASE_NAME", "uptime_test")
-	jwt := createTestUser()
+	_, jwt := createTestUser()
+
 	defer clearIntegrationCollection()
 
 	integrationForm := forms.IntegrationForm{
@@ -96,5 +96,44 @@ func TestAddIntegrationHandler(t *testing.T) {
 
 	if response.Success == false {
 		t.Errorf("response success is false")
+	}
+}
+
+func TestGetIntegrationsHandler(t *testing.T) {
+	os.Setenv("MONGO_DATABASE_NAME", "uptime_test")
+	user, jwt := createTestUser()
+	addTestIntegration(user.ID)
+	defer clearIntegrationCollection()
+
+	req, err := http.NewRequest("GET", "localhost:8080/api/integrations", nil)
+
+	token := fmt.Sprintf("JWT %s", jwt)
+	req.Header.Add("Authorization", token)
+
+	if err != nil {
+		t.Errorf("Unable to create a new request")
+	}
+
+	responseWriter := httptest.NewRecorder()
+
+	GetIntegrationsHandler(responseWriter, req)
+
+	res := responseWriter.Result()
+	defer res.Body.Close()
+
+	if res.StatusCode != http.StatusOK {
+		t.Errorf("expected status OK, got %v", res.StatusCode)
+	}
+
+	response := StructResponse{}
+	json.NewDecoder(res.Body).Decode(&response)
+
+	if response.Success == false {
+		t.Errorf("response success is false")
+	}
+
+	integrations := response.Data["integrations"].([]interface{})
+	if len(integrations) != 1 {
+		t.Errorf("Expected only one integration")
 	}
 }
