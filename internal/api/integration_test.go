@@ -137,3 +137,37 @@ func TestGetIntegrationsHandler(t *testing.T) {
 		t.Errorf("Expected only one integration")
 	}
 }
+
+func TestDeleteIntegrationHandler(t *testing.T) {
+	os.Setenv("MONGO_DATABASE_NAME", "uptime_test")
+	user, jwt := createTestUser()
+	integrationID := addTestIntegration(user.ID)
+	defer clearIntegrationCollection()
+
+	url := fmt.Sprintf("localhost:8080/api/integrations/%s", integrationID)
+	req, err := http.NewRequest("DELETE", url, nil)
+
+	token := fmt.Sprintf("JWT %s", jwt)
+	req.Header.Add("Authorization", token)
+
+	if err != nil {
+		t.Errorf("Unable to create a new request")
+	}
+
+	responseWriter := httptest.NewRecorder()
+
+	DeleteIntegrationHandler(responseWriter, req)
+	res := responseWriter.Result()
+	defer res.Body.Close()
+
+	if res.StatusCode != http.StatusNoContent {
+		t.Errorf("expected status No Content, got %v", res.StatusCode)
+	}
+
+	datastore := db.New()
+	integration := datastore.GetIntegrationByUserID(user.ID, integrationID)
+
+	if integration.ID != "" {
+		t.Errorf("Integration is not removed from the database.")
+	}
+}
