@@ -7,6 +7,7 @@ import (
 
 	"github.com/defraglabs/uptime/internal/db"
 	"github.com/defraglabs/uptime/internal/forms"
+	"github.com/fatih/structs"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -47,10 +48,8 @@ func AddMonitoringURLHandler(w http.ResponseWriter, r *http.Request) {
 	monitoringURL := datastore.AddMonitoringURL(monitorURLForm)
 
 	log.Info(fmt.Sprintf("Added monitoring url %s", monitorURLForm.URL))
-
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(monitoringURL)
+	responseData := structs.Map(monitoringURL)
+	writeSuccessStructResponse(w, responseData, http.StatusCreated)
 }
 
 // GetMonitoringURLHandler api returns the monitoring urls configured
