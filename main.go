@@ -13,7 +13,7 @@ func init() {
 }
 
 func main() {
-	go uptime.StartScheduler()
+	go tasks.StartScheduler()
 
 	api.StartServer()
 }
