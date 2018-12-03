@@ -106,15 +106,30 @@ func (datastore *Datastore) GetUserByComapnyName(companyName string) User {
 }
 
 // AddMonitoringURL function persists the value in db.
-func (datastore *Datastore) AddMonitoringURL(monitorURLForm forms.MonitorURLForm) interface{} {
+func (datastore *Datastore) AddMonitoringURL(monitorURLForm forms.MonitorURLForm) MonitorURL {
 	dbClient := datastore.Client
 	collection := dbClient.Database(datastore.DatabaseName).Collection(MonitorURLCollection)
 
-	result, _ := collection.InsertOne(
+	_, err := collection.InsertOne(
 		context.Background(),
 		monitorURLForm,
 	)
-	return result.InsertedID
+
+	var monitorURL MonitorURL
+	if err == nil {
+		monitorURL = MonitorURL{}
+	} else {
+		monitorURL = MonitorURL{
+			ID:        monitorURLForm.ID,
+			UserID:    monitorURLForm.UserID,
+			Protocol:  monitorURLForm.Protocol,
+			URL:       monitorURLForm.URL,
+			Frequency: monitorURLForm.Frequency,
+			Unit:      monitorURLForm.Unit,
+		}
+	}
+
+	return monitorURL
 }
 
 // GetMonitoringURL function gets monitor url from db.
