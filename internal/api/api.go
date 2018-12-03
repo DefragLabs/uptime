@@ -35,6 +35,7 @@ func StartServer() {
 	router.HandleFunc("/", HomeHandler)
 
 	monitoringDetailsRoutes(router)
+	integrationRoutes(router)
 	authRoutes(router)
 
 	http.ListenAndServe(":8080", handlers.CORS(
