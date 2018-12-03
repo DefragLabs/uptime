@@ -1,6 +1,11 @@
 package forms
 
-import "github.com/defraglabs/uptime/internal/utils"
+import (
+	"fmt"
+	"net/http"
+
+	"github.com/defraglabs/uptime/internal/utils"
+)
 
 // MonitorURLForm struct represents a row in db.
 type MonitorURLForm struct {
@@ -10,6 +15,21 @@ type MonitorURLForm struct {
 	URL       string `bson:"url" json:"url"`
 	Frequency int32  `bson:"frequency" json:"frequency"`
 	Unit      string `bson:"unit" json:"unit"`
+}
+
+func validateURL(url string) bool {
+	resp, err := http.Get(url)
+
+	if err != nil {
+		return false
+	}
+
+	// Status codes should be in 2xx range.
+	if resp.StatusCode >= 300 {
+		return false
+	}
+
+	return true
 }
 
 // Validate monitor url form input
@@ -31,6 +51,11 @@ func (monitorURLForm MonitorURLForm) Validate() string {
 		}
 	} else {
 		return "Invalid unit"
+	}
+
+	url := fmt.Sprintf("%s://%s", monitorURLForm.Protocol, monitorURLForm.URL)
+	if !validateURL(url) {
+		return "Make sure you've provided the correct url & protocol."
 	}
 	return ""
 }
