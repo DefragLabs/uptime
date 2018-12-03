@@ -52,8 +52,8 @@ func AddMonitoringURLHandler(w http.ResponseWriter, r *http.Request) {
 	writeSuccessStructResponse(w, responseData, http.StatusCreated)
 }
 
-// GetMonitoringURLHandler api returns the monitoring urls configured
-func GetMonitoringURLHandler(w http.ResponseWriter, r *http.Request) {
+// GetMonitoringURLsHandler api returns the monitoring urls configured
+func GetMonitoringURLsHandler(w http.ResponseWriter, r *http.Request) {
 	authToken := r.Header.Get("Authorization")
 	user, authErr := db.ValidateJWT(authToken)
 
@@ -66,9 +66,10 @@ func GetMonitoringURLHandler(w http.ResponseWriter, r *http.Request) {
 	datastore := db.New()
 	monitoringURLS := datastore.GetMonitoringURLSByUserID(user.ID)
 
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(monitoringURLS)
+	data := make(map[string]interface{})
+	data["monitoring-urls"] = monitoringURLS
+
+	writeSuccessStructResponse(w, data, http.StatusOK)
 }
 
 // UpdateMonitoringURLHandler api lets the user update the details.
