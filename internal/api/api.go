@@ -18,7 +18,7 @@ func authRoutes(router *mux.Router) {
 
 func monitoringDetailsRoutes(router *mux.Router) {
 	router.HandleFunc("/monitoring-urls", AddMonitoringURLHandler).Methods("POST")
-	router.HandleFunc("/monitoring-urls", GetMonitoringURLHandler).Methods("GET")
+	router.HandleFunc("/monitoring-urls", GetMonitoringURLsHandler).Methods("GET")
 	router.HandleFunc("/monitoring-urls", UpdateMonitoringURLHandler).Methods("PUT")
 }
 
@@ -39,7 +39,7 @@ func StartServer() {
 
 	http.ListenAndServe(":8080", handlers.CORS(
 		handlers.AllowedHeaders([]string{"Content-Type", "Authorization"}),
-		handlers.AllowedMethods([]string{"GET", "POST", "PUT", "HEAD", "OPTIONS"}),
+		handlers.AllowedMethods([]string{"GET", "POST", "PUT", "HEAD", "OPTIONS", "DELETE"}),
 		handlers.AllowedOrigins([]string{"*"}))(router),
 	)
 }
