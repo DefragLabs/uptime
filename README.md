@@ -15,45 +15,14 @@ Run tests using this command `go test ./...`.
 
 Currently run them from the api container.
 
-# Api's
-## Auth
-- Register
-- Login
-- Logout
-- Forgot password
-- Change password
+## Monitor URL's
 
-## Uptime monitoring
-- Add monitoring url. 
-  - Url
-  - Protocol
-  - Frequency
-  - Region [Later]
-- Real time notification when monitoring site goes offline
-  - Email
-  - Webhook
-- Stats page [Later]
+Monitor url's configuration matrix
 
-## Db models
-
-### MonitorURL
-
-|protocol|url|frequency|unit|
-
-### Notification
-
-|type|
-
-type - Email/webhook
-
-**Type - email**
-
-|type|emailId|
-
-**Type - webhook**
-
-|type|webhookUrl|
-
-Interface
-- auth
-- form - validate
+| Frequency | Unit   |
+|-----------|--------|
+| 30        | second |
+| 1         | minute |
+| 5         | minute |
+| 15        | minute |
+| 30        | minute |
