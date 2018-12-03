@@ -1,4 +1,4 @@
-package tasks
+package utils
 
 // MINUTE is the minute const.
 const MINUTE = "minute"

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/defraglabs/uptime/internal/db"
+	"github.com/defraglabs/uptime/internal/utils"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -21,8 +22,8 @@ func pingURL(t time.Time) {
 		start := currentTime
 
 		// Validate if the provided frequency and units are valid.
-		if val, ok := MonitoringConfig[monitorURL.Unit]; ok {
-			if !FrequencyInMonitoringConfig(monitorURL.Frequency, val) {
+		if val, ok := utils.MonitoringConfig[monitorURL.Unit]; ok {
+			if !utils.FrequencyInMonitoringConfig(monitorURL.Frequency, val) {
 				log.Infof("Invalid frequency found for url %s", monitorURL.URL)
 			}
 		} else {
@@ -30,9 +31,9 @@ func pingURL(t time.Time) {
 			continue
 		}
 
-		if monitorURL.Unit == MINUTE && int32(currentTime.Minute())%monitorURL.Frequency != 0 {
+		if monitorURL.Unit == utils.MINUTE && int32(currentTime.Minute())%monitorURL.Frequency != 0 {
 			continue
-		} else if monitorURL.Unit == SECOND && int32(currentTime.Second())%monitorURL.Frequency != 0 {
+		} else if monitorURL.Unit == utils.SECOND && int32(currentTime.Second())%monitorURL.Frequency != 0 {
 			continue
 		}
 

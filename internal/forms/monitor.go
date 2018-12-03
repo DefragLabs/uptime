@@ -1,5 +1,7 @@
 package forms
 
+import "github.com/defraglabs/uptime/internal/utils"
+
 // MonitorURLForm struct represents a row in db.
 type MonitorURLForm struct {
 	ID        string `bson:"_id" json:"id,omitempty"`
@@ -20,6 +22,15 @@ func (monitorURLForm MonitorURLForm) Validate() string {
 		return "Frequency is required"
 	} else if monitorURLForm.Unit == "" {
 		return "Unit is required"
+	}
+
+	// Validate if the provided frequency and units are valid.
+	if val, ok := utils.MonitoringConfig[monitorURLForm.Unit]; ok {
+		if !utils.FrequencyInMonitoringConfig(monitorURLForm.Frequency, val) {
+			return "Invalid frequency"
+		}
+	} else {
+		return "Invalid unit"
 	}
 	return ""
 }
