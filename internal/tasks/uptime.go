@@ -1,4 +1,4 @@
-package uptime
+package tasks
 
 import (
 	"fmt"
@@ -20,7 +20,19 @@ func pingURL(t time.Time) {
 		url := fmt.Sprintf("%s://%s", monitorURL.Protocol, monitorURL.URL)
 		start := currentTime
 
-		if int32(currentTime.Minute())%monitorURL.Frequency != 0 {
+		// Validate if the provided frequency and units are valid.
+		if val, ok := MonitoringConfig[monitorURL.Unit]; ok {
+			if !FrequencyInMonitoringConfig(monitorURL.Frequency, val) {
+				log.Infof("Invalid frequency found for url %s", monitorURL.URL)
+			}
+		} else {
+			log.Infof("Invalid unit found for url %s", monitorURL.URL)
+			continue
+		}
+
+		if monitorURL.Unit == MINUTE && int32(currentTime.Minute())%monitorURL.Frequency != 0 {
+			continue
+		} else if monitorURL.Unit == SECOND && int32(currentTime.Second())%monitorURL.Frequency != 0 {
 			continue
 		}
 
