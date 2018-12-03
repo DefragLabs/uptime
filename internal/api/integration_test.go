@@ -26,24 +26,6 @@ func clearIntegrationCollection() {
 		db.IntegrationCollection).Drop(context.Background())
 }
 
-func createTestUser() (db.User, string) {
-	userRegisterForm := forms.UserRegisterForm{
-		FirstName:   "Alice",
-		LastName:    "Wonderland",
-		Email:       "alice@sample.com",
-		Password:    "test@123",
-		CompanyName: "skynet",
-	}
-	newUser := db.RegisterUser(userRegisterForm)
-	objectID := db.GenerateObjectID()
-	newUser.ID = objectID.Hex()
-
-	datastore := db.New()
-	datastore.CreateUser(newUser)
-	jwt, _ := db.GetJWT(newUser, userRegisterForm.Password)
-	return newUser, jwt
-}
-
 func addTestIntegration(userID string) string {
 	integrationForm := forms.IntegrationForm{
 		UserID: userID,
