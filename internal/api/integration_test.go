@@ -14,7 +14,7 @@ import (
 	"github.com/defraglabs/uptime/internal/forms"
 )
 
-// Clears integraiton collection. Also clears users collection.
+// Clears integration collection. Also clears users collection.
 // We create test user to authenticate the requests. we clear them after
 // every test.
 func clearIntegrationCollection() {
