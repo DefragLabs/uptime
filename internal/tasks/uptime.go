@@ -67,9 +67,9 @@ func StartScheduler() {
 		select {
 		case t := <-c:
 			pingURL(t)
-		case <-time.After(time.Duration(300 * time.Second)):
+		case <-time.After(time.Duration(45 * time.Minute)):
 			// This case acts as a timeout.
-			fmt.Println("Ending")
+			log.Info("Task timeout.")
 		}
 	}
 }
