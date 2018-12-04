@@ -24,7 +24,7 @@ func clearMonitorCollection() {
 		db.UsersCollection).Drop(context.Background())
 
 	datastore.Client.Database(datastore.DatabaseName).Collection(
-		db.IntegrationCollection).Drop(context.Background())
+		db.MonitorURLCollection).Drop(context.Background())
 }
 
 func addTestMonitorURL(userID string) string {
