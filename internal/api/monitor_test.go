@@ -33,8 +33,10 @@ func addTestMonitorURL(userID string) string {
 		Protocol:  "http",
 		URL:       "example.com",
 		Frequency: 5,
-		Unit:      "minutes",
+		Unit:      "minute",
 	}
+	objectID := db.GenerateObjectID()
+	monitorURLForm.ID = objectID.Hex()
 
 	datastore := db.New()
 	monitoringURL := datastore.AddMonitoringURL(monitorURLForm)
