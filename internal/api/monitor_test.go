@@ -52,7 +52,7 @@ func TestAddMonitoringURL(t *testing.T) {
 		Protocol:  "http",
 		URL:       "example.com",
 		Frequency: 5,
-		Unit:      "minutes",
+		Unit:      "minute",
 	}
 
 	byte, _ := json.Marshal(monitorURLForm)
@@ -115,7 +115,7 @@ func TestGetMonitoringURLHandler(t *testing.T) {
 		t.Errorf("response success is false")
 	}
 
-	monitoringURLs := response.Data["monitoring-urls"].([]interface{})
+	monitoringURLs := response.Data["monitoringURLs"].([]interface{})
 	if len(monitoringURLs) != 1 {
 		t.Errorf("Expected only one monitoringURL")
 	}
