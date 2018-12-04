@@ -116,7 +116,7 @@ func (datastore *Datastore) AddMonitoringURL(monitorURLForm forms.MonitorURLForm
 	)
 
 	var monitorURL MonitorURL
-	if err == nil {
+	if err != nil {
 		monitorURL = MonitorURL{}
 	} else {
 		monitorURL = MonitorURL{
