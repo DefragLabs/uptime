@@ -23,9 +23,9 @@ func New() *Datastore {
 	if !ok {
 		databaseName = "uptime"
 	}
-
+	mongoHost := os.Getenv("MONGO_HOST")
 	mongoPass := os.Getenv("MONGO_INITDB_ROOT_PASSWORD")
-	connString := fmt.Sprintf("mongodb://root:%s@db:27017", mongoPass)
+	connString := fmt.Sprintf("mongodb://root:%s@%s:27017", mongoPass, mongoHost)
 	if mongoClient == nil {
 		client, err := mongo.NewClient(connString)
 		if err != nil {

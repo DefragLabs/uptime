@@ -11,6 +11,7 @@ services:
       - .:/go/src/github.com/defraglabs/uptime
     environment:
       - JWT_SECRET=307a11e7180b3728fea818da402762cdf58e69a6d53c99a0a7c0edf27c8a3b83
+      - MONGO_HOST=db
       - MONGO_DATABASE_NAME=uptime
       - MONGO_INITDB_ROOT_PASSWORD=uix23wr
       - FROM_EMAIL=support@uptime.com
