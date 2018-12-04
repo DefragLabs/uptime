@@ -41,11 +41,20 @@ func AddMonitoringURLHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	datastore := db.New()
+	var monitoringURL db.MonitorURL
+	monitoringURL = datastore.GetMonitoringURLByUserIDAndURL(user.ID, monitorURLForm.Protocol, monitorURLForm.URL)
+
+	if monitoringURL.ID != "" {
+		writeErrorResponse(w, "URL already exists.")
+
+		return
+	}
+
 	objectID := db.GenerateObjectID()
 	monitorURLForm.ID = objectID.Hex()
 
-	datastore := db.New()
-	monitoringURL := datastore.AddMonitoringURL(monitorURLForm)
+	monitoringURL = datastore.AddMonitoringURL(monitorURLForm)
 
 	log.Info(fmt.Sprintf("Added monitoring url %s", monitorURLForm.URL))
 	responseData := structs.Map(monitoringURL)

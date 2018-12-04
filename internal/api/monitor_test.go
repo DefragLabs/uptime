@@ -85,6 +85,47 @@ func TestAddMonitoringURL(t *testing.T) {
 	}
 }
 
+func TestAddDuplicateMonitoringURL(t *testing.T) {
+	os.Setenv("MONGO_DATABASE_NAME", "uptime_test")
+	user, jwt := createTestUser()
+	addTestMonitorURL(user.ID)
+	defer clearMonitorCollection()
+
+	monitorURLForm := forms.MonitorURLForm{
+		Protocol:  "http",
+		URL:       "example.com",
+		Frequency: 5,
+		Unit:      "minute",
+	}
+
+	byte, _ := json.Marshal(monitorURLForm)
+	req, err := http.NewRequest("POST", "localhost:8080/api/monitoring-urls", bytes.NewBuffer(byte))
+
+	token := fmt.Sprintf("JWT %s", jwt)
+	req.Header.Add("Authorization", token)
+
+	if err != nil {
+		t.Errorf("Unable to create a new request")
+	}
+
+	responseWriter := httptest.NewRecorder()
+	AddMonitoringURLHandler(responseWriter, req)
+
+	res := responseWriter.Result()
+	defer res.Body.Close()
+
+	if res.StatusCode != http.StatusBadRequest {
+		t.Errorf("expected status BAD REQUEST, got %v", res.StatusCode)
+	}
+
+	response := Response{}
+	json.NewDecoder(res.Body).Decode(&response)
+
+	if response.Success == true {
+		t.Errorf("response success should be false")
+	}
+}
+
 func TestGetMonitoringURLHandler(t *testing.T) {
 	os.Setenv("MONGO_DATABASE_NAME", "uptime_test")
 	user, jwt := createTestUser()

@@ -163,6 +163,24 @@ func (datastore *Datastore) GetMonitoringURLS() []MonitorURL {
 	return monitorURLS
 }
 
+// GetMonitoringURLByUserIDAndURL filters with userID, protocol & URL.
+func (datastore *Datastore) GetMonitoringURLByUserIDAndURL(userID, protocol, URL string) MonitorURL {
+	dbClient := datastore.Client
+	collection := dbClient.Database(datastore.DatabaseName).Collection(MonitorURLCollection)
+
+	monitorURL := MonitorURL{}
+	collection.FindOne(
+		context.Background(),
+		bson.NewDocument(
+			bson.EC.String("userID", userID),
+			bson.EC.String("protocol", protocol),
+			bson.EC.String("url", URL),
+		),
+	).Decode(&monitorURL)
+
+	return monitorURL
+}
+
 // GetMonitoringURLSByUserID gets all URL's for user.
 func (datastore *Datastore) GetMonitoringURLSByUserID(userID string) []MonitorURL {
 	dbClient := datastore.Client
