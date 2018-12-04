@@ -10,6 +10,8 @@ import (
 	"os"
 	"testing"
 
+	"github.com/gorilla/mux"
+
 	"github.com/defraglabs/uptime/internal/db"
 	"github.com/defraglabs/uptime/internal/forms"
 )
@@ -138,6 +140,10 @@ func TestDeleteIntegrationHandler(t *testing.T) {
 
 	responseWriter := httptest.NewRecorder()
 
+	vars := map[string]string{
+		"integrationID": integrationID,
+	}
+	req = mux.SetURLVars(req, vars)
 	DeleteIntegrationHandler(responseWriter, req)
 	res := responseWriter.Result()
 	defer res.Body.Close()
