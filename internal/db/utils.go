@@ -132,22 +132,6 @@ func (datastore *Datastore) AddMonitoringURL(monitorURLForm forms.MonitorURLForm
 	return monitorURL
 }
 
-// GetMonitoringURL function gets monitor url from db.
-func (datastore *Datastore) GetMonitoringURL() MonitorURL {
-	dbClient := datastore.Client
-	collection := dbClient.Database(datastore.DatabaseName).Collection(MonitorURLCollection)
-
-	monitorURL := MonitorURL{}
-	collection.FindOne(
-		context.Background(),
-		bson.NewDocument(
-			bson.EC.String("protocol", "https"),
-		),
-	).Decode(&monitorURL)
-
-	return monitorURL
-}
-
 // GetMonitoringURLS  gets all added url's
 func (datastore *Datastore) GetMonitoringURLS() []MonitorURL {
 	dbClient := datastore.Client
