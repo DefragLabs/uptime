@@ -1,7 +1,7 @@
 package cache
 
 import (
-	"log"
+	"errors"
 	"os"
 	"strconv"
 
@@ -9,7 +9,7 @@ import (
 )
 
 // GetClient returns redis client.
-func GetClient() *redis.Client {
+func GetClient() (*redis.Client, error) {
 	redisHost := os.Getenv("REDIS_HOST")
 	redisDbNo := os.Getenv("REDIS_DB_NUMBER")
 	redisPort := os.Getenv("REDIS_PORT")
@@ -19,7 +19,7 @@ func GetClient() *redis.Client {
 	redisDbNoInt, err := strconv.Atoi(redisDbNo)
 
 	if err != nil {
-		log.Fatal("Redis db no is not a valid integer")
+		return nil, errors.New("Redis db no is not a valid integer")
 	}
 
 	client := redis.NewClient(
@@ -29,5 +29,5 @@ func GetClient() *redis.Client {
 		},
 	)
 
-	return client
+	return client, nil
 }
