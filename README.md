@@ -1,5 +1,7 @@
 # uptime
 
+[![CircleCI](https://circleci.com/gh/DefragLabs/uptime/tree/master.svg?style=svg)](https://circleci.com/gh/DefragLabs/uptime/tree/master)
+
 # Goals
 
 - Server uptime monitoring
