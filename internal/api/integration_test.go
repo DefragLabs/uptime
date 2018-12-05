@@ -77,7 +77,6 @@ func TestAddIntegrationHandler(t *testing.T) {
 
 	response := Response{}
 	json.NewDecoder(res.Body).Decode(&response)
-	fmt.Println("Response: ", response)
 
 	if response.Success == false {
 		t.Errorf("response success is false")
