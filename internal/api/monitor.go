@@ -61,6 +61,10 @@ func AddMonitoringURLHandler(w http.ResponseWriter, r *http.Request) {
 	initialPingMonitorURL(monitoringURL, datastore)
 
 	log.Info(fmt.Sprintf("Added monitoring url %s", monitorURLForm.URL))
+
+	// This is done to retreive the ping results of the added monitor URL.
+	monitoringURL = datastore.GetMonitoringURLByUserID(user.ID, monitoringURL.ID)
+
 	responseData := structs.Map(monitoringURL)
 	writeSuccessStructResponse(w, responseData, http.StatusCreated)
 }
@@ -75,7 +79,9 @@ func initialPingMonitorURL(monitorURL db.MonitorURL, datastore *db.Datastore) {
 		// Don't fail like this.
 		log.Warn("API ping failed")
 	}
-	timeStamp := time.UnixDate
+
+	t := time.Now()
+	timeStamp := t.Format(time.UnixDate)
 
 	datastore.AddMonitorDetail(monitorURL, resp.Status, timeStamp, duration.String())
 }
