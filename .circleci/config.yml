@@ -11,7 +11,10 @@ jobs:
           MONGO_HOST: 127.0.0.1
           MONGO_DATABASE_NAME: uptime
           MONGO_INITDB_ROOT_PASSWORD: test
-      
+          REDIS_HOST: redis
+          REDIS_PORT: 6379
+          REDIS_DB_NUMBER: 0
+
       # Specify service dependencies here if necessary
       # CircleCI maintains a library of pre-built images
       # documented at https://circleci.com/docs/2.0/circleci-images/
@@ -19,6 +22,11 @@ jobs:
         environment:
           MONGO_INITDB_ROOT_USERNAME: root
           MONGO_INITDB_ROOT_PASSWORD: test
+      - image: circleci/redis:latest
+        environment:
+          REDIS_HOST: redis
+          REDIS_PORT: 6379
+          REDIS_DB_NUMBER: 0
 
     #### TEMPLATE_NOTE: go expects specific checkout path representing url
     #### expecting it in the form of
