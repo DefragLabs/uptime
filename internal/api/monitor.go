@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/gorilla/mux"
+
 	"github.com/defraglabs/uptime/internal/db"
 	"github.com/defraglabs/uptime/internal/forms"
 	"github.com/fatih/structs"
@@ -101,4 +103,26 @@ func GetMonitoringURLsHandler(w http.ResponseWriter, r *http.Request) {
 // UpdateMonitoringURLHandler api lets the user update the details.
 func UpdateMonitoringURLHandler(w http.ResponseWriter, r *http.Request) {
 
+}
+
+// DeleteMonitoringURLHandler api can be used to delete a monitor url
+func DeleteMonitoringURLHandler(w http.ResponseWriter, r *http.Request) {
+	authToken := r.Header.Get("Authorization")
+	user, authErr := db.ValidateJWT(authToken)
+
+	vars := mux.Vars(r)
+	monitoringURLID := vars["monitoringURLID"]
+
+	if authErr != nil {
+		writeErrorResponse(w, "Authentication failed")
+
+		return
+	}
+
+	datastore := db.New()
+	datastore.DeleteMonitoringURL(user.ID, monitoringURLID)
+
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusNoContent)
+	log.Info("Monitoring url removed successfully")
 }

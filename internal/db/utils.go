@@ -216,6 +216,37 @@ func (datastore *Datastore) GetMonitoringURLSByUserID(userID string) []MonitorUR
 	return monitorURLS
 }
 
+// GetMonitoringURLByUserID gets monitor URL by userID & monitoringURLID
+func (datastore *Datastore) GetMonitoringURLByUserID(userID, monitoringURLID string) MonitorURL {
+	dbClient := datastore.Client
+	collection := dbClient.Database(datastore.DatabaseName).Collection(MonitorURLCollection)
+
+	monitorURL := MonitorURL{}
+	collection.FindOne(
+		context.Background(),
+		bson.NewDocument(
+			bson.EC.String("userID", userID),
+			bson.EC.String("_id", monitoringURLID),
+		),
+	).Decode(&monitorURL)
+
+	return monitorURL
+}
+
+// DeleteMonitoringURL delete's the provided monitorURL
+func (datastore *Datastore) DeleteMonitoringURL(userID, monitoringURLID string) {
+	dbClient := datastore.Client
+	collection := dbClient.Database(datastore.DatabaseName).Collection(MonitorURLCollection)
+
+	collection.FindOneAndDelete(
+		context.Background(),
+		bson.NewDocument(
+			bson.EC.String("userID", userID),
+			bson.EC.String("_id", monitoringURLID),
+		),
+	)
+}
+
 // AddMonitorDetail add monitor url detail to the db.
 func (datastore *Datastore) AddMonitorDetail(monitorURL MonitorURL, status, time, duration string) {
 	dbClient := datastore.Client

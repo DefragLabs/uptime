@@ -12,6 +12,7 @@ import (
 
 	"github.com/defraglabs/uptime/internal/db"
 	"github.com/defraglabs/uptime/internal/forms"
+	"github.com/gorilla/mux"
 )
 
 // Clears monitor collection. Also clears users collection.
@@ -161,5 +162,43 @@ func TestGetMonitoringURLHandler(t *testing.T) {
 	monitoringURLs := response.Data["monitoringURLs"].([]interface{})
 	if len(monitoringURLs) != 1 {
 		t.Errorf("Expected only one monitoringURL")
+	}
+}
+
+func TestDeleteMonitoringURLHandler(t *testing.T) {
+	os.Setenv("MONGO_DATABASE_NAME", "uptime_test")
+	user, jwt := createTestUser()
+	monitoringURLID := addTestMonitorURL(user.ID)
+	defer clearMonitorCollection()
+
+	req, err := http.NewRequest("DELETE", "localhost:8080/api/monitoring-urls", nil)
+
+	token := fmt.Sprintf("JWT %s", jwt)
+	req.Header.Add("Authorization", token)
+
+	if err != nil {
+		t.Errorf("Unable to create a new request")
+	}
+
+	responseWriter := httptest.NewRecorder()
+	vars := map[string]string{
+		"monitoringURLID": monitoringURLID,
+	}
+	req = mux.SetURLVars(req, vars)
+
+	DeleteMonitoringURLHandler(responseWriter, req)
+
+	res := responseWriter.Result()
+	defer res.Body.Close()
+
+	if res.StatusCode != http.StatusNoContent {
+		t.Errorf("expected status NoContent, got %v", res.StatusCode)
+	}
+
+	datastore := db.New()
+	monitoringURL := datastore.GetMonitoringURLByUserID(user.ID, monitoringURLID)
+
+	if monitoringURL.ID != "" {
+		t.Errorf("Integration is not removed from the database.")
 	}
 }
