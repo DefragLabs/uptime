@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/defraglabs/uptime/internal/db"
 	"github.com/defraglabs/uptime/internal/forms"
@@ -55,10 +56,26 @@ func AddMonitoringURLHandler(w http.ResponseWriter, r *http.Request) {
 	monitorURLForm.ID = objectID.Hex()
 
 	monitoringURL = datastore.AddMonitoringURL(monitorURLForm)
+	initialPingMonitorURL(monitoringURL, datastore)
 
 	log.Info(fmt.Sprintf("Added monitoring url %s", monitorURLForm.URL))
 	responseData := structs.Map(monitoringURL)
 	writeSuccessStructResponse(w, responseData, http.StatusCreated)
+}
+
+func initialPingMonitorURL(monitorURL db.MonitorURL, datastore *db.Datastore) {
+	start := time.Now()
+	url := fmt.Sprintf("%s://%s", monitorURL.Protocol, monitorURL.URL)
+
+	resp, err := http.Get(url)
+	duration := time.Since(start)
+	if err != nil {
+		// Don't fail like this.
+		log.Warn("API ping failed")
+	}
+	timeStamp := time.UnixDate
+
+	datastore.AddMonitorDetail(monitorURL, resp.Status, timeStamp, duration.String())
 }
 
 // GetMonitoringURLsHandler api returns the monitoring urls configured
