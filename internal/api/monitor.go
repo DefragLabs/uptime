@@ -126,6 +126,13 @@ func DeleteMonitoringURLHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	datastore := db.New()
+	monitoringURL := datastore.GetMonitoringURLByUserID(user.ID, monitoringURLID)
+	if monitoringURL.ID == "" {
+		writeErrorResponse(w, "Monitoring url not found")
+
+		return
+	}
+
 	datastore.DeleteMonitoringURL(user.ID, monitoringURLID)
 
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
