@@ -31,7 +31,7 @@ func pingURL(t time.Time) {
 			continue
 		}
 
-		if monitorURL.Unit == utils.MINUTE && int32(currentTime.Minute())%monitorURL.Frequency != 0 {
+		if monitorURL.Unit == utils.MINUTE && int32(currentTime.Minute()*60+currentTime.Second())%(monitorURL.Frequency*60) != 0 {
 			continue
 		} else if monitorURL.Unit == utils.SECOND && int32(currentTime.Second())%monitorURL.Frequency != 0 {
 			continue
