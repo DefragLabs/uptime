@@ -233,6 +233,24 @@ func (datastore *Datastore) GetMonitoringURLByUserID(userID, monitoringURLID str
 	return monitorURL
 }
 
+// UpdateMonitoringURLByUserID updates monitor URL
+func (datastore *Datastore) UpdateMonitoringURLByUserID(userID, monitoringURLID string, monitoringURLForm forms.MonitorURLForm) MonitorURL {
+	dbClient := datastore.Client
+	collection := dbClient.Database(datastore.DatabaseName).Collection(MonitorURLCollection)
+
+	updatedMonitoringURL := MonitorURL{}
+	collection.FindOneAndUpdate(
+		context.Background(),
+		bson.NewDocument(
+			bson.EC.String("userID", userID),
+			bson.EC.String("_id", monitoringURLID),
+		),
+		monitoringURLForm,
+	).Decode(updatedMonitoringURL)
+
+	return updatedMonitoringURL
+}
+
 // DeleteMonitoringURL delete's the provided monitorURL
 func (datastore *Datastore) DeleteMonitoringURL(userID, monitoringURLID string) {
 	dbClient := datastore.Client

@@ -165,6 +165,49 @@ func TestGetMonitoringURLHandler(t *testing.T) {
 	}
 }
 
+func TestUpdateMonitoringURLHandler(t *testing.T) {
+	os.Setenv("MONGO_DATABASE_NAME", "uptime_test")
+	user, jwt := createTestUser()
+	monitoringURLID := addTestMonitorURL(user.ID)
+	defer clearMonitorCollection()
+
+	monitorURLForm := forms.MonitorURLForm{
+		Protocol:  "https",
+		Frequency: 30,
+		Unit:      "second",
+	}
+
+	byte, _ := json.Marshal(monitorURLForm)
+
+	req, err := http.NewRequest("PUT", "localhost:8080/api/monitoring-urls", bytes.NewBuffer(byte))
+	token := fmt.Sprintf("JWT %s", jwt)
+	req.Header.Add("Authorization", token)
+
+	if err != nil {
+		t.Errorf("Unable to create a new request")
+	}
+
+	responseWriter := httptest.NewRecorder()
+
+	// Add url path parameter
+	vars := map[string]string{
+		"monitoringURLID": monitoringURLID,
+	}
+	req = mux.SetURLVars(req, vars)
+
+	UpdateMonitoringURLHandler(responseWriter, req)
+
+	res := responseWriter.Result()
+	defer res.Body.Close()
+
+	response := Response{}
+	json.NewDecoder(res.Body).Decode(&response)
+
+	if res.StatusCode != http.StatusNoContent {
+		t.Errorf("expected status OK, got %v", res.StatusCode)
+	}
+}
+
 func TestDeleteMonitoringURLHandler(t *testing.T) {
 	os.Setenv("MONGO_DATABASE_NAME", "uptime_test")
 	user, jwt := createTestUser()

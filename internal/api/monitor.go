@@ -107,8 +107,49 @@ func GetMonitoringURLsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // UpdateMonitoringURLHandler api lets the user update the details.
+// Can update the following
+//   - Protocol
+//   - Frequency
+//   - Unit
 func UpdateMonitoringURLHandler(w http.ResponseWriter, r *http.Request) {
+	authToken := r.Header.Get("Authorization")
+	user, authErr := db.ValidateJWT(authToken)
 
+	vars := mux.Vars(r)
+	monitoringURLID := vars["monitoringURLID"]
+
+	if authErr != nil {
+		writeErrorResponse(w, "Authentication failed")
+
+		return
+	}
+
+	datastore := db.New()
+	monitoringURL := datastore.GetMonitoringURLByUserID(user.ID, monitoringURLID)
+	if monitoringURL.ID == "" {
+		writeErrorResponse(w, "Monitoring url not found")
+
+		return
+	}
+
+	decoder := json.NewDecoder(r.Body)
+	var monitorURLForm forms.MonitorURLForm
+	monitorURLForm.UserID = user.ID
+	err := decoder.Decode(&monitorURLForm)
+	if err != nil {
+		writeErrorResponse(w, "Invalid input format")
+
+		log.Info("Invalid input format for forgot password")
+		return
+	}
+
+	monitorURLForm.ID = monitoringURLID
+	monitorURLForm.URL = monitoringURL.URL
+
+	monitoringURL = datastore.UpdateMonitoringURLByUserID(user.ID, monitoringURLID, monitorURLForm)
+
+	responseData := structs.Map(monitoringURL)
+	writeSuccessStructResponse(w, responseData, http.StatusOK)
 }
 
 // DeleteMonitoringURLHandler api can be used to delete a monitor url
