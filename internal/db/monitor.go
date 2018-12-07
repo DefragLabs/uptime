@@ -2,26 +2,26 @@ package db
 
 // MonitorURL struct represents a row in db.
 type MonitorURL struct {
-	ID string `bson:"_id" json:"id,omitempty"`
+	ID string `bson:"_id" json:"id,omitempty" structs:"id"`
 
-	UserID string `bson:"userID" json:"userID"`
+	UserID string `bson:"userID" json:"userID" structs:"userID"`
 
 	// Http protocol (http/https)
-	Protocol string `bson:"protocol" json:"protocol"`
+	Protocol string `bson:"protocol" json:"protocol" structs:"protocol"`
 
 	// URL that should be pinged.
 	URL string `bson:"url" json:"url"`
 
 	// Frequency in integer
-	Frequency int32 `bson:"frequency" json:"frequency"`
+	Frequency int32 `bson:"frequency" json:"frequency" structs:"frequency"`
 
 	// Time unit (minutes, hours)
-	Unit string `bson:"unit" json:"unit"`
+	Unit string `bson:"unit" json:"unit" structs:"unit"`
 
 	// Status of the service. It can be (UP, DOWN, "")
-	Status string `bson:"status" json:"status"`
+	Status string `bson:"status" json:"status" structs:"status"`
 
-	Results []MonitorResult `bson:"results,omitempty" json:"results"`
+	Results []MonitorResult `bson:"results,omitempty" json:"results" structs:"results"`
 }
 
 // MonitorResult contains the ping result.
