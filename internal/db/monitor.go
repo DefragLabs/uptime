@@ -16,7 +16,11 @@ type MonitorURL struct {
 	Frequency int32 `bson:"frequency" json:"frequency"`
 
 	// Time unit (minutes, hours)
-	Unit    string          `bson:"unit" json:"unit"`
+	Unit string `bson:"unit" json:"unit"`
+
+	// Status of the service. It can be (UP, DOWN, "")
+	Status string `bson:"status" json:"status"`
+
 	Results []MonitorResult `bson:"results,omitempty" json:"results"`
 }
 

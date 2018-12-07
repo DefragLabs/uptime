@@ -266,17 +266,18 @@ func (datastore *Datastore) DeleteMonitoringURL(userID, monitoringURLID string) 
 }
 
 // AddMonitorDetail add monitor url detail to the db.
-func (datastore *Datastore) AddMonitorDetail(monitorURL MonitorURL, status, time, duration string) {
+func (datastore *Datastore) AddMonitorDetail(monitorURL MonitorURL, statusCode, status, time, duration string) {
 	dbClient := datastore.Client
 	collection := dbClient.Database(datastore.DatabaseName).Collection(MonitorURLCollection)
 
 	result := MonitorResult{
-		Status:   status,
+		Status:   statusCode,
 		Duration: duration,
 		Time:     time,
 	}
 
 	monitorURL.Results = append(monitorURL.Results, result)
+	monitorURL.Status = status
 
 	collection.FindOneAndReplace(
 		context.Background(),

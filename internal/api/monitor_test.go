@@ -203,7 +203,7 @@ func TestUpdateMonitoringURLHandler(t *testing.T) {
 	response := Response{}
 	json.NewDecoder(res.Body).Decode(&response)
 
-	if res.StatusCode != http.StatusNoContent {
+	if res.StatusCode != http.StatusOK {
 		t.Errorf("expected status OK, got %v", res.StatusCode)
 	}
 }

@@ -45,7 +45,9 @@ func pingURL(t time.Time) {
 		}
 		timeStamp := t.Format(time.UnixDate)
 		fmt.Println(duration, url, resp.Status, timeStamp)
-		datastore.AddMonitorDetail(monitorURL, resp.Status, timeStamp, duration.String())
+
+		serviceStatus := utils.GetServiceStatus(resp.StatusCode)
+		datastore.AddMonitorDetail(monitorURL, resp.Status, serviceStatus, timeStamp, duration.String())
 	}
 }
 

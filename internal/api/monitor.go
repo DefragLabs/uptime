@@ -10,6 +10,7 @@ import (
 
 	"github.com/defraglabs/uptime/internal/db"
 	"github.com/defraglabs/uptime/internal/forms"
+	"github.com/defraglabs/uptime/internal/utils"
 	"github.com/fatih/structs"
 	log "github.com/sirupsen/logrus"
 )
@@ -83,7 +84,8 @@ func initialPingMonitorURL(monitorURL db.MonitorURL, datastore *db.Datastore) {
 	t := time.Now()
 	timeStamp := t.Format(time.UnixDate)
 
-	datastore.AddMonitorDetail(monitorURL, resp.Status, timeStamp, duration.String())
+	serviceStatus := utils.GetServiceStatus(resp.StatusCode)
+	datastore.AddMonitorDetail(monitorURL, resp.Status, serviceStatus, timeStamp, duration.String())
 }
 
 // GetMonitoringURLsHandler api returns the monitoring urls configured
