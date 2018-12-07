@@ -12,7 +12,7 @@ const (
 // on the response status code.
 func GetServiceStatus(responseStatusCode int) string {
 	if responseStatusCode >= 400 {
-		return StatusUp
+		return StatusDown
 	}
-	return StatusDown
+	return StatusUp
 }
