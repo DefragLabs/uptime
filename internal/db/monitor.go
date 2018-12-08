@@ -27,11 +27,11 @@ type MonitorURL struct {
 // MonitorResult contains the ping result.
 type MonitorResult struct {
 	// Status code of the response.
-	Status string
+	Status string `structs:"status"`
 
 	// Duration of response
-	Duration string
+	Duration string `structs:"duration"`
 
 	// Timestamp when the ping was run.
-	Time string
+	Time string `structs:"time"`
 }
