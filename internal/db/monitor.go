@@ -10,7 +10,7 @@ type MonitorURL struct {
 	Protocol string `bson:"protocol" json:"protocol" structs:"protocol"`
 
 	// URL that should be pinged.
-	URL string `bson:"url" json:"url"`
+	URL string `bson:"url" json:"url" structs:"url"`
 
 	// Frequency in integer
 	Frequency int32 `bson:"frequency" json:"frequency" structs:"frequency"`
