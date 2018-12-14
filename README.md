@@ -17,6 +17,11 @@ Run tests using this command `go test ./...`.
 
 Currently run them from the api container.
 
+## Development
+
+We add `structs` (From structs external package) tags in go struct so the output keys are properly formatted.
+This package doesn't honour `json` tags.
+
 ## Monitor URL's
 
 Monitor url's configuration matrix
