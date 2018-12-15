@@ -127,7 +127,7 @@ func TestAddDuplicateMonitoringURL(t *testing.T) {
 	}
 }
 
-func TestGetMonitoringURLHandler(t *testing.T) {
+func TestGetMonitoringURLsHandler(t *testing.T) {
 	os.Setenv("MONGO_DATABASE_NAME", "uptime_test")
 	user, jwt := createTestUser()
 	addTestMonitorURL(user.ID)
@@ -162,6 +162,43 @@ func TestGetMonitoringURLHandler(t *testing.T) {
 	monitoringURLs := response.Data["monitoringURLs"].([]interface{})
 	if len(monitoringURLs) != 1 {
 		t.Errorf("Expected only one monitoringURL")
+	}
+}
+
+func TestGetMonitoringURLHandler(t *testing.T) {
+	os.Setenv("MONGO_DATABASE_NAME", "uptime_test")
+	user, jwt := createTestUser()
+	monitoringURLID := addTestMonitorURL(user.ID)
+	defer clearMonitorCollection()
+
+	req, err := http.NewRequest("GET", "localhost:8080/api/monitoring-urls", nil)
+	vars := map[string]string{
+		"monitoringURLID": monitoringURLID,
+	}
+	req = mux.SetURLVars(req, vars)
+
+	token := fmt.Sprintf("JWT %s", jwt)
+	req.Header.Add("Authorization", token)
+
+	if err != nil {
+		t.Errorf("Unable to create a new request")
+	}
+
+	responseWriter := httptest.NewRecorder()
+	GetMonitoringURLsHandler(responseWriter, req)
+
+	res := responseWriter.Result()
+	defer res.Body.Close()
+
+	if res.StatusCode != http.StatusOK {
+		t.Errorf("expected status OK, got %v", res.StatusCode)
+	}
+
+	response := StructResponse{}
+	json.NewDecoder(res.Body).Decode(&response)
+
+	if response.Success == false {
+		t.Errorf("response success is false")
 	}
 }
 

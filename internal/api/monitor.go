@@ -108,6 +108,38 @@ func GetMonitoringURLsHandler(w http.ResponseWriter, r *http.Request) {
 	writeSuccessStructResponse(w, data, http.StatusOK)
 }
 
+// GetMonitoringURLHandler gets an individual monitoringURL
+func GetMonitoringURLHandler(w http.ResponseWriter, r *http.Request) {
+	authToken := r.Header.Get("Authorization")
+	user, authErr := db.ValidateJWT(authToken)
+
+	if authErr != nil {
+		writeErrorResponse(w, "Authentication failed")
+
+		return
+	}
+
+	vars := mux.Vars(r)
+	monitoringURLID := vars["monitoringURLID"]
+
+	if monitoringURLID == "" {
+		writeErrorResponse(w, "Monitoring URL id is required")
+
+		return
+	}
+
+	datastore := db.New()
+	monitoringURL := datastore.GetMonitoringURLByUserID(user.ID, monitoringURLID)
+	if monitoringURL.ID == "" {
+		writeErrorResponse(w, "Monitoring url not found")
+
+		return
+	}
+
+	responseData := structs.Map(monitoringURL)
+	writeSuccessStructResponse(w, responseData, http.StatusOK)
+}
+
 // UpdateMonitoringURLHandler api lets the user update the details.
 // Can update the following
 //   - Protocol
