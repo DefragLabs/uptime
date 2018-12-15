@@ -75,7 +75,7 @@ func initialPingMonitorURL(monitorURL db.MonitorURL, datastore *db.Datastore) {
 	url := fmt.Sprintf("%s://%s", monitorURL.Protocol, monitorURL.URL)
 
 	resp, err := http.Get(url)
-	duration := time.Since(start)
+	responseTime := time.Since(start)
 	if err != nil {
 		// Don't fail like this.
 		log.Warn("API ping failed")
@@ -84,8 +84,10 @@ func initialPingMonitorURL(monitorURL db.MonitorURL, datastore *db.Datastore) {
 	t := time.Now()
 	timeStamp := t.Format(time.UnixDate)
 
+	responseTimeInMillSeconds := float64(responseTime.Nanoseconds()) / 1000000
+
 	serviceStatus := utils.GetServiceStatus(resp.StatusCode)
-	datastore.AddMonitorDetail(monitorURL, resp.Status, serviceStatus, timeStamp, duration.String())
+	datastore.AddMonitorDetail(monitorURL, resp.Status, serviceStatus, timeStamp, responseTimeInMillSeconds)
 }
 
 // GetMonitoringURLsHandler api returns the monitoring urls configured

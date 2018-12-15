@@ -270,7 +270,7 @@ func (datastore *Datastore) DeleteMonitoringURL(userID, monitoringURLID string) 
 
 // AddMonitorDetail add monitor url detail to the db.
 // Status UP/DOWN, statusCode is the http response code
-func (datastore *Datastore) AddMonitorDetail(monitorURL MonitorURL, statusCode, status, time, responseTime string) MonitorResult {
+func (datastore *Datastore) AddMonitorDetail(monitorURL MonitorURL, statusCode, status, time string, responseTime float64) MonitorResult {
 	dbClient := datastore.Client
 	collection := dbClient.Database(datastore.DatabaseName).Collection(MonitorURLCollection)
 

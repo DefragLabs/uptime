@@ -49,7 +49,9 @@ func pingURL(t time.Time) {
 		fmt.Println(responseTime, url, resp.Status, timeStamp)
 
 		serviceStatus := utils.GetServiceStatus(resp.StatusCode)
-		datastore.AddMonitorDetail(monitorURL, resp.Status, serviceStatus, timeStamp, responseTime.String())
+
+		responseTimeInMillSeconds := float64(responseTime.Nanoseconds()) / 1000000
+		datastore.AddMonitorDetail(monitorURL, resp.Status, serviceStatus, timeStamp, responseTimeInMillSeconds)
 	}
 }
 
