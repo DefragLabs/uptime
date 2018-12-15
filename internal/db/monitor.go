@@ -24,14 +24,14 @@ type MonitorURL struct {
 
 // MonitorResult contains the ping result.
 type MonitorResult struct {
-	MonitorURLID string `bson:"monitorURLID" structs:"monitorURLID"`
+	MonitorURLID string `bson:"monitorURLID" json:"monitorURLID" structs:"monitorURLID"`
 
 	// Status code of the response.
-	Status string `bson:"status" structs:"status"`
+	Status string `bson:"status" json:"status" structs:"status"`
 
 	// Duration of response
-	Duration string `bson:"duration" structs:"duration"`
+	Duration string `bson:"duration" json:"duration" structs:"duration"`
 
 	// Timestamp when the ping was run.
-	Time string `bson:"time" structs:"time"`
+	Time string `bson:"time" json:"time" structs:"time"`
 }
