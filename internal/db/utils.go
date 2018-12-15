@@ -274,10 +274,11 @@ func (datastore *Datastore) AddMonitorDetail(monitorURL MonitorURL, statusCode, 
 	collection := dbClient.Database(datastore.DatabaseName).Collection(MonitorURLCollection)
 
 	result := MonitorResult{
-		MonitorURLID: monitorURL.ID,
-		Status:       statusCode,
-		Duration:     duration,
-		Time:         time,
+		MonitorURLID:      monitorURL.ID,
+		Status:            status,
+		StatusDescription: statusCode,
+		Duration:          duration,
+		Time:              time,
 	}
 
 	// Update status in monitorURL

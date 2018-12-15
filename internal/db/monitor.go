@@ -26,8 +26,11 @@ type MonitorURL struct {
 type MonitorResult struct {
 	MonitorURLID string `bson:"monitorURLID" json:"monitorURLID" structs:"monitorURLID"`
 
-	// Status code of the response.
+	// Status UP/Down of the response.
 	Status string `bson:"status" json:"status" structs:"status"`
+
+	// Status code of the response.
+	StatusDescription string `bson:"statusDescription" json:"statusDescription" structs:"statusDescription"`
 
 	// Duration of response
 	Duration string `bson:"duration" json:"duration" structs:"duration"`
