@@ -24,6 +24,9 @@ type MonitorURL struct {
 
 // MonitorResult contains the ping result.
 type MonitorResult struct {
+	ID string `bson:"_id" json:"id,omitempty" structs:"id"`
+
+	// MonitorURLID stores the relationship to MonitorURL
 	MonitorURLID string `bson:"monitorURLID" json:"monitorURLID" structs:"monitorURLID"`
 
 	// Status UP/Down of the response.

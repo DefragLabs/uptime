@@ -269,11 +269,15 @@ func (datastore *Datastore) DeleteMonitoringURL(userID, monitoringURLID string) 
 }
 
 // AddMonitorDetail add monitor url detail to the db.
-func (datastore *Datastore) AddMonitorDetail(monitorURL MonitorURL, statusCode, status, time, duration string) {
+// Status UP/DOWN, statusCode is the http response code
+func (datastore *Datastore) AddMonitorDetail(monitorURL MonitorURL, statusCode, status, time, duration string) MonitorResult {
 	dbClient := datastore.Client
 	collection := dbClient.Database(datastore.DatabaseName).Collection(MonitorURLCollection)
 
+	objectID := GenerateObjectID()
+
 	result := MonitorResult{
+		ID:                objectID.Hex(),
 		MonitorURLID:      monitorURL.ID,
 		Status:            status,
 		StatusDescription: statusCode,
@@ -296,6 +300,8 @@ func (datastore *Datastore) AddMonitorDetail(monitorURL MonitorURL, statusCode, 
 		context.Background(),
 		result,
 	)
+
+	return result
 }
 
 // GetMonitoringURLStats gets the stats for given monitorURLID
