@@ -8,10 +8,13 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"strconv"
 	"testing"
+	"time"
 
 	"github.com/defraglabs/uptime/internal/db"
 	"github.com/defraglabs/uptime/internal/forms"
+	"github.com/defraglabs/uptime/internal/utils"
 	"github.com/gorilla/mux"
 )
 
@@ -43,6 +46,17 @@ func addTestMonitorURL(userID string) string {
 	monitoringURL := datastore.AddMonitoringURL(monitorURLForm)
 
 	return monitoringURL.ID
+}
+
+func addTestMonitorURLResult(userID, monitorURLID string) string {
+	datastore := db.New()
+
+	monitorURL := datastore.GetMonitoringURLByUserID(userID, monitorURLID)
+
+	status := utils.GetServiceStatus(http.StatusOK)
+	monitorResult := datastore.AddMonitorDetail(monitorURL, strconv.Itoa(http.StatusOK), status, "100ms", time.Now().String())
+
+	return monitorResult.ID
 }
 
 func TestAddMonitoringURL(t *testing.T) {
@@ -280,5 +294,37 @@ func TestDeleteMonitoringURLHandler(t *testing.T) {
 
 	if monitoringURL.ID != "" {
 		t.Errorf("Integration is not removed from the database.")
+	}
+}
+
+func TestGetMonitoringURLStatsHandler(t *testing.T) {
+	os.Setenv("MONGO_DATABASE_NAME", "uptime_test")
+	user, jwt := createTestUser()
+	monitoringURLID := addTestMonitorURL(user.ID)
+	addTestMonitorURLResult(user.ID, monitoringURLID)
+	defer clearMonitorCollection()
+
+	url := fmt.Sprintf("localhost:8080/api/monitoring-urls/%s/stats", monitoringURLID)
+	req, err := http.NewRequest("DELETE", url, nil)
+
+	token := fmt.Sprintf("JWT %s", jwt)
+	req.Header.Add("Authorization", token)
+
+	if err != nil {
+		t.Errorf("Unable to create a new request")
+	}
+	responseWriter := httptest.NewRecorder()
+	vars := map[string]string{
+		"monitoringURLID": monitoringURLID,
+	}
+	req = mux.SetURLVars(req, vars)
+
+	GetMonitoringURLStatsHandler(responseWriter, req)
+
+	res := responseWriter.Result()
+	defer res.Body.Close()
+
+	if res.StatusCode != http.StatusOK {
+		t.Errorf("expected status OK, got %v", res.StatusCode)
 	}
 }
