@@ -1,7 +1,10 @@
 package db
 
 import (
+	"bytes"
+	"encoding/json"
 	"errors"
+	"net/http"
 
 	"github.com/PagerDuty/go-pagerduty"
 	log "github.com/sirupsen/logrus"
@@ -28,6 +31,11 @@ type Integration struct {
 	PDSeverity string `bson:"pdSeverity" json:"pdSeverity" structs:"pdSeverity"`
 }
 
+type slackNotificationMsg struct {
+	URL     string
+	Message string
+}
+
 // SendPagerDutyEvent sends an event v2 to pagerduty
 func (integration *Integration) SendPagerDutyEvent(timestamp string) error {
 	if integration.PDRoutingKey == "" {
@@ -52,6 +60,29 @@ func (integration *Integration) SendPagerDutyEvent(timestamp string) error {
 
 	if err != nil {
 		log.Infof("Pagerduty event send failed for integration %s", integration.ID)
+
+		return errors.New("pagerduty event send failed")
+	}
+
+	return nil
+}
+
+// SendSlackNotification sends a notification to slack using slack webhooks.
+func (integration *Integration) SendSlackNotification(monitorURL MonitorURL) error {
+	if integration.WebhookURL == "" {
+		log.Infof("Invalid integration. Webhook url not found for integration %s", integration.ID)
+
+		return errors.New("invalid integration. webhook url not found")
+	}
+	msg := slackNotificationMsg{
+		URL:     monitorURL.URL,
+		Message: "Site down",
+	}
+	byte, _ := json.Marshal(msg)
+	_, err := http.Post(integration.WebhookURL, "application/json", bytes.NewBuffer(byte))
+
+	if err != nil {
+		return errors.New("slack notification send failed")
 	}
 
 	return nil
