@@ -214,3 +214,32 @@ func DeleteMonitoringURLHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 	log.Info("Monitoring url removed successfully")
 }
+
+// GetMonitoringURLStatsHandler get the ping stats of a monitor url
+func GetMonitoringURLStatsHandler(w http.ResponseWriter, r *http.Request) {
+	authToken := r.Header.Get("Authorization")
+	user, authErr := db.ValidateJWT(authToken)
+
+	vars := mux.Vars(r)
+	monitoringURLID := vars["monitoringURLID"]
+
+	if authErr != nil {
+		writeErrorResponse(w, "Authentication failed")
+
+		return
+	}
+
+	datastore := db.New()
+	monitoringURL := datastore.GetMonitoringURLByUserID(user.ID, monitoringURLID)
+	if monitoringURL.ID == "" {
+		writeErrorResponse(w, "Monitoring url not found")
+
+		return
+	}
+
+	monitorResults := datastore.GetMonitoringURLStats(monitoringURLID)
+	data := make(map[string]interface{})
+	data["monitorResults"] = monitorResults
+
+	writeSuccessStructResponse(w, data, http.StatusOK)
+}

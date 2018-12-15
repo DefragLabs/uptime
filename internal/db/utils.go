@@ -21,6 +21,9 @@ const (
 	// monitor URL's.
 	MonitorURLCollection = "monitorURL"
 
+	// MonitorResultCollection stores the result of the pings to the configured monitoring url's
+	MonitorResultCollection = "monitorURLResult"
+
 	// IntegrationCollection stores all the integrations configured by an user
 	IntegrationCollection = "integration"
 )
@@ -271,14 +274,14 @@ func (datastore *Datastore) AddMonitorDetail(monitorURL MonitorURL, statusCode, 
 	collection := dbClient.Database(datastore.DatabaseName).Collection(MonitorURLCollection)
 
 	result := MonitorResult{
-		Status:   statusCode,
-		Duration: duration,
-		Time:     time,
+		MonitorURLID: monitorURL.ID,
+		Status:       statusCode,
+		Duration:     duration,
+		Time:         time,
 	}
 
-	monitorURL.Results = append(monitorURL.Results, result)
+	// Update status in monitorURL
 	monitorURL.Status = status
-
 	collection.FindOneAndReplace(
 		context.Background(),
 		bson.NewDocument(
@@ -286,6 +289,49 @@ func (datastore *Datastore) AddMonitorDetail(monitorURL MonitorURL, statusCode, 
 		),
 		monitorURL,
 	)
+
+	monitorResultCollection := dbClient.Database(datastore.DatabaseName).Collection(MonitorResultCollection)
+	monitorResultCollection.InsertOne(
+		context.Background(),
+		result,
+	)
+}
+
+// GetMonitoringURLStats gets the stats for given monitorURLID
+func (datastore *Datastore) GetMonitoringURLStats(monitorURLID string) []MonitorResult {
+	dbClient := datastore.Client
+	collection := dbClient.Database(datastore.DatabaseName).Collection(MonitorResultCollection)
+
+	count, _ := collection.Count(
+		context.Background(),
+		bson.NewDocument(
+			bson.EC.String("monitorURLID", monitorURLID),
+		),
+	)
+
+	cursor, _ := collection.Find(
+		context.Background(),
+		bson.NewDocument(
+			bson.EC.String("monitorURLID", monitorURLID),
+		),
+	)
+
+	monitorResults := make([]MonitorResult, count)
+
+	i := 0
+	for cursor.Next(context.Background()) {
+		monitorResult := MonitorResult{}
+		err := cursor.Decode(&monitorResult)
+
+		if err != nil {
+			log.Fatal("error while parsing cursor for monitor urls result")
+		}
+
+		monitorResults[i] = monitorResult
+		i++
+	}
+
+	return monitorResults
 }
 
 // AddResetPassword adds password code with the user id.

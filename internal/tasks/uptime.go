@@ -14,10 +14,12 @@ func pingURL(t time.Time) {
 	datastore := db.New()
 	monitoringURLS := datastore.GetMonitoringURLS()
 
-	log.Infof("Start pinging urls. Total urls %d", len(monitoringURLS))
+	currentTime := time.Now()
+	if int32(currentTime.Minute()*60+currentTime.Second())%(5*60) == 0 {
+		log.Infof("Start pinging urls. Total urls %d", len(monitoringURLS))
+	}
 
 	for _, monitorURL := range monitoringURLS {
-		currentTime := time.Now()
 		url := fmt.Sprintf("%s://%s", monitorURL.Protocol, monitorURL.URL)
 		start := currentTime
 
@@ -60,7 +62,7 @@ func StartScheduler() {
 		ticker := time.Tick(frequency)
 
 		for {
-			time.Sleep(time.Duration(10 * time.Second))
+			time.Sleep(time.Duration(1 * time.Second))
 			c <- <-ticker
 		}
 	}()

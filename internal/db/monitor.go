@@ -20,18 +20,18 @@ type MonitorURL struct {
 
 	// Status of the service. It can be (UP, DOWN, "")
 	Status string `bson:"status" json:"status" structs:"status"`
-
-	Results []MonitorResult `bson:"results,omitempty" json:"results" structs:"results"`
 }
 
 // MonitorResult contains the ping result.
 type MonitorResult struct {
+	MonitorURLID string `bson:"monitorURLID" structs:"monitorURLID"`
+
 	// Status code of the response.
-	Status string `structs:"status"`
+	Status string `bson:"status" structs:"status"`
 
 	// Duration of response
-	Duration string `structs:"duration"`
+	Duration string `bson:"duration" structs:"duration"`
 
 	// Timestamp when the ping was run.
-	Time string `structs:"time"`
+	Time string `bson:"time" structs:"time"`
 }

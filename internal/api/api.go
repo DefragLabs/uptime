@@ -24,6 +24,10 @@ func monitoringDetailsRoutes(router *mux.Router) {
 	router.HandleFunc("/monitoring-urls/{monitoringURLID}", DeleteMonitoringURLHandler).Methods("DELETE")
 }
 
+func monitoringStatsRoutes(router *mux.Router) {
+	router.HandleFunc("/monitoring-urls/{monitoringURLID}/stats", GetMonitoringURLStatsHandler).Methods("GET")
+}
+
 func integrationRoutes(router *mux.Router) {
 	router.HandleFunc("/integrations", AddIntegrationHandler).Methods("POST")
 	router.HandleFunc("/integrations", GetIntegrationsHandler).Methods("GET")
@@ -37,6 +41,7 @@ func StartServer() {
 	router.HandleFunc("/", HomeHandler)
 
 	monitoringDetailsRoutes(router)
+	monitoringStatsRoutes(router)
 	integrationRoutes(router)
 	authRoutes(router)
 
