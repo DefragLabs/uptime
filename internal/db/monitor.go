@@ -35,8 +35,8 @@ type MonitorResult struct {
 	// Status code of the response.
 	StatusDescription string `bson:"statusDescription" json:"statusDescription" structs:"statusDescription"`
 
-	// Duration of response
-	Duration string `bson:"duration" json:"duration" structs:"duration"`
+	// Response time
+	ResponseTime string `bson:"responseTime" json:"responseTime" structs:"responseTime"`
 
 	// Timestamp when the ping was run.
 	Time string `bson:"time" json:"time" structs:"time"`

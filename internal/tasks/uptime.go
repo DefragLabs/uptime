@@ -40,16 +40,16 @@ func pingURL(t time.Time) {
 		}
 
 		resp, err := http.Get(url)
-		duration := time.Since(start)
+		responseTime := time.Since(start)
 		if err != nil {
 			// Don't fail like this.
 			log.Warn("API ping failed")
 		}
 		timeStamp := t.Format(time.UnixDate)
-		fmt.Println(duration, url, resp.Status, timeStamp)
+		fmt.Println(responseTime, url, resp.Status, timeStamp)
 
 		serviceStatus := utils.GetServiceStatus(resp.StatusCode)
-		datastore.AddMonitorDetail(monitorURL, resp.Status, serviceStatus, timeStamp, duration.String())
+		datastore.AddMonitorDetail(monitorURL, resp.Status, serviceStatus, timeStamp, responseTime.String())
 	}
 }
 
