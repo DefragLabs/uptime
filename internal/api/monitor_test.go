@@ -54,7 +54,9 @@ func addTestMonitorURLResult(userID, monitorURLID string) string {
 	monitorURL := datastore.GetMonitoringURLByUserID(userID, monitorURLID)
 
 	status := utils.GetServiceStatus(http.StatusOK)
-	monitorResult := datastore.AddMonitorDetail(monitorURL, strconv.Itoa(http.StatusOK), status, "100ms", time.Now().String())
+	responseTime := float64(time.Duration(1*time.Second).Nanoseconds()) / 1000000
+	monitorResult := datastore.AddMonitorDetail(
+		monitorURL, strconv.Itoa(http.StatusOK), status, "100ms", responseTime)
 
 	return monitorResult.ID
 }
