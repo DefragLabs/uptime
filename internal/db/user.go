@@ -22,7 +22,7 @@ type User struct {
 	FirstName    string `bson:"firstName" json:"firstName"`
 	LastName     string `bson:"lastName" json:"lastName"`
 	PhoneNumber  string `bson:"phoneNumber" json:"phoneNumber"`
-	CompanyName  string `bson:"CompanyName" json:"CompanyName"`
+	CompanyName  string `bson:"CompanyName" json:"companyName"`
 	Email        string `bson:"email" json:"email"`
 	PasswordHash string `bson:"passwordHash" json:"password"`
 }
