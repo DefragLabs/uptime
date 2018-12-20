@@ -53,9 +53,9 @@ func (datastore *Datastore) UpdateUser(user User) {
 
 	collection.FindOneAndUpdate(
 		context.Background(),
-		bson.NewDocument(
-			bson.EC.String("_id", user.ID),
-		),
+		bson.D{
+			{"_id", user.ID},
+		},
 		user,
 	)
 }
@@ -68,9 +68,9 @@ func (datastore *Datastore) GetUserByID(userID string) User {
 	user := User{}
 	collection.FindOne(
 		context.Background(),
-		bson.NewDocument(
-			bson.EC.String("_id", userID),
-		),
+		bson.D{
+			{"_id", userID},
+		},
 	).Decode(&user)
 
 	return user
@@ -84,9 +84,9 @@ func (datastore *Datastore) GetUserByEmail(email string) User {
 	user := User{}
 	collection.FindOne(
 		context.Background(),
-		bson.NewDocument(
-			bson.EC.String("email", email),
-		),
+		bson.D{
+			{"email", email},
+		},
 	).Decode(&user)
 
 	return user
@@ -100,9 +100,9 @@ func (datastore *Datastore) GetUserByComapnyName(companyName string) User {
 	user := User{}
 	collection.FindOne(
 		context.Background(),
-		bson.NewDocument(
-			bson.EC.String("companyName", companyName),
-		),
+		bson.D{
+			{"companyName", companyName},
+		},
 	).Decode(&user)
 
 	return user
@@ -142,13 +142,13 @@ func (datastore *Datastore) GetMonitoringURLS() []MonitorURL {
 
 	count, _ := collection.Count(
 		context.Background(),
-		bson.NewDocument(),
+		bson.D{},
 	)
 
 	monitorURLS := make([]MonitorURL, count)
 	cursor, _ := collection.Find(
 		context.Background(),
-		bson.NewDocument(),
+		bson.D{},
 	)
 
 	i := 0
@@ -174,11 +174,11 @@ func (datastore *Datastore) GetMonitoringURLByUserIDAndURL(userID, protocol, URL
 	monitorURL := MonitorURL{}
 	collection.FindOne(
 		context.Background(),
-		bson.NewDocument(
-			bson.EC.String("userID", userID),
-			bson.EC.String("protocol", protocol),
-			bson.EC.String("url", URL),
-		),
+		bson.D{
+			{"userID", userID},
+			{"protocol", protocol},
+			{"url", URL},
+		},
 	).Decode(&monitorURL)
 
 	return monitorURL
@@ -191,17 +191,17 @@ func (datastore *Datastore) GetMonitoringURLSByUserID(userID string) []MonitorUR
 
 	count, _ := collection.Count(
 		context.Background(),
-		bson.NewDocument(
-			bson.EC.String("userID", userID),
-		),
+		bson.D{
+			{"userID", userID},
+		},
 	)
 
 	monitorURLS := make([]MonitorURL, count)
 	cursor, _ := collection.Find(
 		context.Background(),
-		bson.NewDocument(
-			bson.EC.String("userID", userID),
-		),
+		bson.D{
+			{"userID", userID},
+		},
 	)
 
 	i := 0
@@ -227,10 +227,10 @@ func (datastore *Datastore) GetMonitoringURLByUserID(userID, monitoringURLID str
 	monitorURL := MonitorURL{}
 	collection.FindOne(
 		context.Background(),
-		bson.NewDocument(
-			bson.EC.String("userID", userID),
-			bson.EC.String("_id", monitoringURLID),
-		),
+		bson.D{
+			{"userID", userID},
+			{"_id", monitoringURLID},
+		},
 	).Decode(&monitorURL)
 
 	return monitorURL
@@ -244,10 +244,10 @@ func (datastore *Datastore) UpdateMonitoringURLByUserID(userID, monitoringURLID 
 	updatedMonitoringURL := MonitorURL{}
 	collection.FindOneAndUpdate(
 		context.Background(),
-		bson.NewDocument(
-			bson.EC.String("userID", userID),
-			bson.EC.String("_id", monitoringURLID),
-		),
+		bson.D{
+			{"userID", userID},
+			{"_id", monitoringURLID},
+		},
 		monitoringURLForm,
 	).Decode(updatedMonitoringURL)
 
@@ -261,10 +261,10 @@ func (datastore *Datastore) DeleteMonitoringURL(userID, monitoringURLID string) 
 
 	collection.FindOneAndDelete(
 		context.Background(),
-		bson.NewDocument(
-			bson.EC.String("userID", userID),
-			bson.EC.String("_id", monitoringURLID),
-		),
+		bson.D{
+			{"userID", userID},
+			{"_id", monitoringURLID},
+		},
 	)
 }
 
@@ -289,9 +289,9 @@ func (datastore *Datastore) AddMonitorDetail(monitorURL MonitorURL, statusCode, 
 	monitorURL.Status = status
 	collection.FindOneAndReplace(
 		context.Background(),
-		bson.NewDocument(
-			bson.EC.String("_id", monitorURL.ID),
-		),
+		bson.D{
+			{"_id", monitorURL.ID},
+		},
 		monitorURL,
 	)
 
@@ -311,16 +311,16 @@ func (datastore *Datastore) GetMonitoringURLStats(monitorURLID string) []Monitor
 
 	count, _ := collection.Count(
 		context.Background(),
-		bson.NewDocument(
-			bson.EC.String("monitorURLID", monitorURLID),
-		),
+		bson.D{
+			{"monitorURLID", monitorURLID},
+		},
 	)
 
 	cursor, _ := collection.Find(
 		context.Background(),
-		bson.NewDocument(
-			bson.EC.String("monitorURLID", monitorURLID),
-		),
+		bson.D{
+			{"monitorURLID", monitorURLID},
+		},
 	)
 
 	monitorResults := make([]MonitorResult, count)
@@ -361,10 +361,10 @@ func (datastore *Datastore) GetResetPassword(uid, code string) ResetPassword {
 	resetPassword := ResetPassword{}
 	collection.FindOne(
 		context.Background(),
-		bson.NewDocument(
-			bson.EC.String("uid", uid),
-			bson.EC.String("code", code),
-		),
+		bson.D{
+			{"uid", uid},
+			{"code", code},
+		},
 	).Decode(&resetPassword)
 
 	return resetPassword
@@ -398,16 +398,16 @@ func (datastore *Datastore) GetIntegrationsByUserID(userID string) []Integration
 
 	count, _ := collection.Count(
 		context.Background(),
-		bson.NewDocument(
-			bson.EC.String("userID", userID),
-		),
+		bson.D{
+			{"userID", userID},
+		},
 	)
 
 	cursor, _ := collection.Find(
 		context.Background(),
-		bson.NewDocument(
-			bson.EC.String("userID", userID),
-		),
+		bson.D{
+			{"userID", userID},
+		},
 	)
 
 	integrations := make([]Integration, count)
@@ -436,10 +436,10 @@ func (datastore *Datastore) GetIntegrationByUserID(userID string, integrationID 
 
 	collection.FindOne(
 		context.Background(),
-		bson.NewDocument(
-			bson.EC.String("userID", userID),
-			bson.EC.String("_id", integrationID),
-		),
+		bson.D{
+			{"userID", userID},
+			{"_id", integrationID},
+		},
 	).Decode(&integration)
 
 	return integration
@@ -452,9 +452,9 @@ func (datastore *Datastore) DeleteIntegration(userID string, integrationID strin
 
 	collection.FindOneAndDelete(
 		context.Background(),
-		bson.NewDocument(
-			bson.EC.String("userID", userID),
-			bson.EC.String("_id", integrationID),
-		),
+		bson.D{
+			{"userID", userID},
+			{"_id", integrationID},
+		},
 	)
 }
