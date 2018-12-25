@@ -44,7 +44,7 @@ func addTestIntegration(userID string) string {
 	return integration.ID
 }
 
-func TestAddIntegrationHandler(t *testing.T) {
+func TestAddEmailIntegrationHandler(t *testing.T) {
 	os.Setenv("MONGO_DATABASE_NAME", "uptime_test")
 	_, jwt := createTestUser()
 
@@ -53,6 +53,86 @@ func TestAddIntegrationHandler(t *testing.T) {
 	integrationForm := forms.IntegrationForm{
 		Type:  "email",
 		Email: "alice@sample.com",
+	}
+
+	byte, _ := json.Marshal(integrationForm)
+	req, err := http.NewRequest("POST", "localhost:8080/api/integrations", bytes.NewBuffer(byte))
+
+	token := fmt.Sprintf("JWT %s", jwt)
+	req.Header.Add("Authorization", token)
+
+	if err != nil {
+		t.Errorf("Unable to create a new request")
+	}
+
+	responseWriter := httptest.NewRecorder()
+	AddIntegrationHandler(responseWriter, req)
+
+	res := responseWriter.Result()
+	defer res.Body.Close()
+
+	if res.StatusCode != http.StatusCreated {
+		t.Errorf("expected status CREATED, got %v", res.StatusCode)
+	}
+
+	response := Response{}
+	json.NewDecoder(res.Body).Decode(&response)
+
+	if response.Success == false {
+		t.Errorf("response success is false")
+	}
+}
+
+func TestAddSlackIntegrationHandler(t *testing.T) {
+	os.Setenv("MONGO_DATABASE_NAME", "uptime_test")
+	_, jwt := createTestUser()
+
+	defer clearIntegrationCollection()
+
+	integrationForm := forms.IntegrationForm{
+		Type:       "slack",
+		WebhookURL: "http://localhost/",
+	}
+
+	byte, _ := json.Marshal(integrationForm)
+	req, err := http.NewRequest("POST", "localhost:8080/api/integrations", bytes.NewBuffer(byte))
+
+	token := fmt.Sprintf("JWT %s", jwt)
+	req.Header.Add("Authorization", token)
+
+	if err != nil {
+		t.Errorf("Unable to create a new request")
+	}
+
+	responseWriter := httptest.NewRecorder()
+	AddIntegrationHandler(responseWriter, req)
+
+	res := responseWriter.Result()
+	defer res.Body.Close()
+
+	if res.StatusCode != http.StatusCreated {
+		t.Errorf("expected status CREATED, got %v", res.StatusCode)
+	}
+
+	response := Response{}
+	json.NewDecoder(res.Body).Decode(&response)
+
+	if response.Success == false {
+		t.Errorf("response success is false")
+	}
+}
+
+func TestAddPagerDutyIntegrationHandler(t *testing.T) {
+	os.Setenv("MONGO_DATABASE_NAME", "uptime_test")
+	_, jwt := createTestUser()
+
+	defer clearIntegrationCollection()
+
+	integrationForm := forms.IntegrationForm{
+		Type:         "pagerduty",
+		PDAction:     "trigger",
+		PDRoutingKey: "routing-key",
+		PDSeverity:   "critical",
 	}
 
 	byte, _ := json.Marshal(integrationForm)
