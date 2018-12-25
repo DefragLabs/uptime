@@ -19,7 +19,7 @@ func authRoutes(router *mux.Router) {
 func monitoringDetailsRoutes(router *mux.Router) {
 	router.HandleFunc("/monitoring-urls", AddMonitoringURLHandler).Methods("POST")
 	router.HandleFunc("/monitoring-urls", GetMonitoringURLsHandler).Methods("GET")
-	router.HandleFunc("/monitoring-urls", UpdateMonitoringURLHandler).Methods("PUT")
+	router.HandleFunc("/monitoring-urls/{monitoringURLID}", UpdateMonitoringURLHandler).Methods("PUT")
 	router.HandleFunc("/monitoring-urls/{monitoringURLID}", GetMonitoringURLHandler).Methods("GET")
 	router.HandleFunc("/monitoring-urls/{monitoringURLID}", DeleteMonitoringURLHandler).Methods("DELETE")
 }

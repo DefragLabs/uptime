@@ -253,11 +253,23 @@ func TestUpdateMonitoringURLHandler(t *testing.T) {
 	res := responseWriter.Result()
 	defer res.Body.Close()
 
-	response := Response{}
+	response := StructResponse{}
 	json.NewDecoder(res.Body).Decode(&response)
 
 	if res.StatusCode != http.StatusOK {
 		t.Errorf("expected status OK, got %v", res.StatusCode)
+	}
+
+	unit := response.Data["unit"]
+	frequency := response.Data["frequency"]
+	protocol := response.Data["protocol"]
+
+	if unit != "second" {
+		t.Error("unit should be second after update")
+	} else if frequency != 30 {
+		t.Error("frequency should be 30 after update")
+	} else if protocol != "https" {
+		t.Error("protocol should be http after update")
 	}
 }
 

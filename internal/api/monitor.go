@@ -170,7 +170,7 @@ func UpdateMonitoringURLHandler(w http.ResponseWriter, r *http.Request) {
 
 	decoder := json.NewDecoder(r.Body)
 	var monitorURLForm forms.MonitorURLForm
-	monitorURLForm.UserID = user.ID
+
 	err := decoder.Decode(&monitorURLForm)
 	if err != nil {
 		writeErrorResponse(w, "Invalid input format")
@@ -180,7 +180,7 @@ func UpdateMonitoringURLHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	monitorURLForm.ID = monitoringURLID
-	monitorURLForm.URL = monitoringURL.URL
+	monitorURLForm.UserID = user.ID
 
 	monitoringURL = datastore.UpdateMonitoringURLByUserID(user.ID, monitoringURLID, monitorURLForm)
 
