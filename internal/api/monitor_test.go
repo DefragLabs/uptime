@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"reflect"
 	"strconv"
 	"testing"
 	"time"
@@ -264,6 +265,7 @@ func TestUpdateMonitoringURLHandler(t *testing.T) {
 	frequency := response.Data["frequency"]
 	protocol := response.Data["protocol"]
 
+	fmt.Println(unit, frequency, reflect.TypeOf(frequency), frequency == 30, protocol)
 	if unit != "second" {
 		t.Error("unit should be second after update")
 	} else if frequency != 30 {

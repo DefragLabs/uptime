@@ -182,8 +182,10 @@ func UpdateMonitoringURLHandler(w http.ResponseWriter, r *http.Request) {
 	monitorURLForm.ID = monitoringURLID
 	monitorURLForm.UserID = user.ID
 
-	monitoringURL = datastore.UpdateMonitoringURLByUserID(user.ID, monitoringURLID, monitorURLForm)
+	datastore.UpdateMonitoringURLByUserID(user.ID, monitoringURLID, monitorURLForm)
 
+	// Refresh from database.
+	monitoringURL = datastore.GetMonitoringURLByUserID(user.ID, monitoringURLID)
 	responseData := structs.Map(monitoringURL)
 	writeSuccessStructResponse(w, responseData, http.StatusOK)
 }
