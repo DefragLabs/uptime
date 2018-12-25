@@ -10,14 +10,16 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io"
 	"net"
 	"reflect"
 	"strings"
 
+	"github.com/mongodb/mongo-go-driver/options"
+	"github.com/mongodb/mongo-go-driver/x/bsonx"
+
 	"github.com/mongodb/mongo-go-driver/bson"
+	"github.com/mongodb/mongo-go-driver/bson/bsoncodec"
 	"github.com/mongodb/mongo-go-driver/bson/objectid"
-	"github.com/mongodb/mongo-go-driver/mongo/countopt"
 )
 
 // Dialer is used to make network connections.
@@ -25,130 +27,164 @@ type Dialer interface {
 	DialContext(ctx context.Context, network, address string) (net.Conn, error)
 }
 
-// TransformDocument handles transforming a document of an allowable type into
-// a *bson.Document. This method is called directly after most methods that
-// have one or more parameters that are documents.
-//
-// The supported types for document are:
-//
-//  bson.Marshaler
-//  bson.DocumentMarshaler
-//  bson.Reader
-//  []byte (must be a valid BSON document)
-//  io.Reader (only 1 BSON document will be read)
-//  A custom struct type
-//
-func TransformDocument(document interface{}) (*bson.Document, error) {
-	switch d := document.(type) {
-	case nil:
-		return bson.NewDocument(), nil
-	case *bson.Document:
-		return d, nil
-	case bson.Marshaler, bson.Reader, []byte, io.Reader:
-		return bson.NewDocumentEncoder().EncodeDocument(document)
-	case bson.DocumentMarshaler:
-		return d.MarshalBSONDocument()
-	default:
-		var kind reflect.Kind
-		if t := reflect.TypeOf(document); t.Kind() == reflect.Ptr {
-			kind = t.Elem().Kind()
-		}
-		if reflect.ValueOf(document).Kind() == reflect.Struct || kind == reflect.Struct {
-			return bson.NewDocumentEncoder().EncodeDocument(document)
-		}
-		if reflect.ValueOf(document).Kind() == reflect.Map &&
-			reflect.TypeOf(document).Key().Kind() == reflect.String {
-			return bson.NewDocumentEncoder().EncodeDocument(document)
-		}
-
-		return nil, fmt.Errorf("cannot transform type %s to a *bson.Document", reflect.TypeOf(document))
-	}
+// BSONAppender is an interface implemented by types that can marshal a
+// provided type into BSON bytes and append those bytes to the provided []byte.
+// The AppendBSON can return a non-nil error and non-nil []byte. The AppendBSON
+// method may also write incomplete BSON to the []byte.
+type BSONAppender interface {
+	AppendBSON([]byte, interface{}) ([]byte, error)
 }
 
-func ensureID(d *bson.Document) (interface{}, error) {
+// BSONAppenderFunc is an adapter function that allows any function that
+// satisfies the AppendBSON method signature to be used where a BSONAppender is
+// used.
+type BSONAppenderFunc func([]byte, interface{}) ([]byte, error)
+
+// AppendBSON implements the BSONAppender interface
+func (baf BSONAppenderFunc) AppendBSON(dst []byte, val interface{}) ([]byte, error) {
+	return baf(dst, val)
+}
+
+// MarshalError is returned when attempting to transform a value into a document
+// results in an error.
+type MarshalError struct {
+	Value interface{}
+	Err   error
+}
+
+// Error implements the error interface.
+func (me MarshalError) Error() string {
+	return fmt.Sprintf("cannot transform type %s to a *bsonx.Document", reflect.TypeOf(me.Value))
+}
+
+// Pipeline is a type that makes creating aggregation pipelines easier. It is a
+// helper and is intended for serializing to BSON.
+//
+// Example usage:
+//
+// 		mongo.Pipeline{{
+// 			{"$group", bson.D{{"_id", "$state"}, {"totalPop", bson.D{"$sum", "$pop"}}}},
+// 			{"$match": bson.D{{"totalPop", bson.D{"$gte", 10*1000*1000}}}},
+// 		}}
+//
+type Pipeline []bson.D
+
+func transformDocument(registry *bsoncodec.Registry, val interface{}) (bsonx.Doc, error) {
+	if registry == nil {
+		registry = bson.NewRegistryBuilder().Build()
+	}
+	if val == nil {
+		return bsonx.Doc{}, nil
+	}
+	if doc, ok := val.(bsonx.Doc); ok {
+		return doc.Copy(), nil
+	}
+	if bs, ok := val.([]byte); ok {
+		// Slight optimization so we'll just use MarshalBSON and not go through the codec machinery.
+		val = bson.Raw(bs)
+	}
+
+	// TODO(skriptble): Use a pool of these instead.
+	buf := make([]byte, 0, 256)
+	b, err := bson.MarshalAppendWithRegistry(registry, buf[:0], val)
+	if err != nil {
+		return nil, MarshalError{Value: val, Err: err}
+	}
+	return bsonx.ReadDoc(b)
+}
+
+func ensureID(d bsonx.Doc) (bsonx.Doc, interface{}) {
 	var id interface{}
 
 	elem, err := d.LookupElementErr("_id")
-	switch {
-	case err == bson.ErrElementNotFound:
-		oid := objectid.New()
-		d.Append(bson.EC.ObjectID("_id", oid))
-		id = oid
-	case err != nil:
-		return nil, err
-	default:
+	switch err.(type) {
+	case nil:
 		id = elem
+	default:
+		oid := objectid.New()
+		d = append(d, bsonx.Elem{"_id", bsonx.ObjectID(oid)})
+		id = oid
 	}
-	return id, nil
+	return d, id
 }
 
-func ensureDollarKey(doc *bson.Document) error {
-	if elem, ok := doc.ElementAtOK(0); !ok || !strings.HasPrefix(elem.Key(), "$") {
+func ensureDollarKey(doc bsonx.Doc) error {
+	if len(doc) > 0 && !strings.HasPrefix(doc[0].Key, "$") {
 		return errors.New("update document must contain key beginning with '$'")
 	}
 	return nil
 }
 
-func transformAggregatePipeline(pipeline interface{}) (*bson.Array, error) {
-	var pipelineArr *bson.Array
+func transformAggregatePipeline(registry *bsoncodec.Registry, pipeline interface{}) (bsonx.Arr, error) {
+	pipelineArr := bsonx.Arr{}
 	switch t := pipeline.(type) {
-	case *bson.Array:
-		pipelineArr = t
-	case []*bson.Document:
-		pipelineArr = bson.NewArray()
+	case Pipeline:
+		for _, d := range t {
+			doc, err := transformDocument(registry, d)
+			if err != nil {
+				return nil, err
+			}
+			pipelineArr = append(pipelineArr, bsonx.Document(doc))
+		}
+	case bsonx.Arr:
+		pipelineArr = make(bsonx.Arr, len(t))
+		copy(pipelineArr, t)
+	case []bsonx.Doc:
+		pipelineArr = bsonx.Arr{}
 
 		for _, doc := range t {
-			pipelineArr.Append(bson.VC.Document(doc))
+			pipelineArr = append(pipelineArr, bsonx.Document(doc))
 		}
 	case []interface{}:
-		pipelineArr = bson.NewArray()
+		pipelineArr = bsonx.Arr{}
 
 		for _, val := range t {
-			doc, err := TransformDocument(val)
+			doc, err := transformDocument(registry, val)
 			if err != nil {
 				return nil, err
 			}
 
-			pipelineArr.Append(bson.VC.Document(doc))
+			pipelineArr = append(pipelineArr, bsonx.Document(doc))
 		}
 	default:
-		p, err := TransformDocument(pipeline)
+		p, err := transformDocument(registry, pipeline)
 		if err != nil {
 			return nil, err
 		}
 
-		pipelineArr = bson.ArrayFromDocument(p)
+		for _, elem := range p {
+			pipelineArr = append(pipelineArr, elem.Value)
+		}
 	}
 
 	return pipelineArr, nil
 }
 
 // Build the aggregation pipeline for the CountDocument command.
-func countDocumentsAggregatePipeline(filter interface{}, opts ...countopt.Count) (*bson.Array, error) {
-	pipeline := bson.NewArray()
-	filterDoc, err := TransformDocument(filter)
+func countDocumentsAggregatePipeline(registry *bsoncodec.Registry, filter interface{}, opts *options.CountOptions) (bsonx.Arr, error) {
+	pipeline := bsonx.Arr{}
+	filterDoc, err := transformDocument(registry, filter)
 
 	if err != nil {
 		return nil, err
 	}
-	pipeline.Append(bson.VC.Document(bson.NewDocument(bson.EC.SubDocument("$match", filterDoc))))
-	for _, opt := range opts {
-		switch t := opt.(type) {
-		case countopt.OptSkip:
-			skip := int64(t)
-			pipeline.Append(bson.VC.Document(bson.NewDocument(bson.EC.Int64("$skip", skip))))
-		case countopt.OptLimit:
-			limit := int64(t)
-			pipeline.Append(bson.VC.Document(bson.NewDocument(bson.EC.Int64("$limit", limit))))
+	pipeline = append(pipeline, bsonx.Document(bsonx.Doc{{"$match", bsonx.Document(filterDoc)}}))
+
+	if opts != nil {
+		if opts.Skip != nil {
+			pipeline = append(pipeline, bsonx.Document(bsonx.Doc{{"$skip", bsonx.Int64(*opts.Skip)}}))
+		}
+		if opts.Limit != nil {
+			pipeline = append(pipeline, bsonx.Document(bsonx.Doc{{"$limit", bsonx.Int64(*opts.Limit)}}))
 		}
 	}
-	pipeline.Append(bson.VC.Document(bson.NewDocument(
-		bson.EC.SubDocument("$group", bson.NewDocument(
-			bson.EC.Null("_id"),
-			bson.EC.SubDocument("n", bson.NewDocument(
-				bson.EC.Int32("$sum", 1)),
-			)),
-		)),
+
+	pipeline = append(pipeline, bsonx.Document(bsonx.Doc{
+		{"$group", bsonx.Document(bsonx.Doc{
+			{"_id", bsonx.Null()},
+			{"n", bsonx.Document(bsonx.Doc{{"$sum", bsonx.Int32(1)}})},
+		})},
+	},
 	))
 
 	return pipeline, nil

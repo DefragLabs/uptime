@@ -7,15 +7,14 @@
 package mongo
 
 import (
-	"bytes"
 	"context"
 	"errors"
 
 	"github.com/mongodb/mongo-go-driver/bson"
 	"github.com/mongodb/mongo-go-driver/core/command"
-	"github.com/mongodb/mongo-go-driver/core/option"
 	"github.com/mongodb/mongo-go-driver/core/session"
-	"github.com/mongodb/mongo-go-driver/mongo/changestreamopt"
+	"github.com/mongodb/mongo-go-driver/options"
+	"github.com/mongodb/mongo-go-driver/x/bsonx"
 )
 
 // ErrMissingResumeToken indicates that a change stream notification from the server did not
@@ -23,13 +22,13 @@ import (
 var ErrMissingResumeToken = errors.New("cannot provide resume functionality when the resume token is missing")
 
 type changeStream struct {
-	pipeline    *bson.Array
-	options     []option.ChangeStreamOptioner
+	pipeline    bsonx.Arr
+	options     []bsonx.Elem
 	coll        *Collection
 	cursor      Cursor
 	session     *session.Client
 	clock       *session.ClusterClock
-	resumeToken *bson.Document
+	resumeToken bsonx.Doc
 	err         error
 }
 
@@ -37,45 +36,56 @@ const errorCodeNotMaster int32 = 10107
 const errorCodeCursorNotFound int32 = 43
 
 func newChangeStream(ctx context.Context, coll *Collection, pipeline interface{},
-	opts ...changestreamopt.ChangeStream) (*changeStream, error) {
+	opts ...*options.ChangeStreamOptions) (*changeStream, error) {
 
-	pipelineArr, err := transformAggregatePipeline(pipeline)
+	pipelineArr, err := transformAggregatePipeline(coll.registry, pipeline)
 	if err != nil {
 		return nil, err
 	}
 
-	csOpts, sess, err := changestreamopt.BundleChangeStream(opts...).Unbundle(true)
-	if err != nil {
-		return nil, err
-	}
+	csOpts := options.MergeChangeStreamOptions(opts...)
+	sess := sessionFromContext(ctx)
 
 	err = coll.client.ValidSession(sess)
 	if err != nil {
 		return nil, err
 	}
 
-	changeStreamOptions := bson.NewDocument()
+	changeStreamOptions := make(bsonx.Doc, 0)
+	aggOpts := options.Aggregate()
 
-	for _, opt := range csOpts {
-		err = opt.Option(changeStreamOptions)
-		if err != nil {
-			return nil, err
-		}
+	if csOpts.BatchSize != nil {
+		changeStreamOptions = append(changeStreamOptions, bsonx.Elem{"batchSize", bsonx.Int32(*csOpts.BatchSize)})
+	}
+	if csOpts.Collation != nil {
+		changeStreamOptions = append(changeStreamOptions, bsonx.Elem{
+			"collation", bsonx.Document(csOpts.Collation.ToDocument()),
+		})
+	}
+	if csOpts.FullDocument != nil {
+		changeStreamOptions = append(changeStreamOptions, bsonx.Elem{
+			"fullDocument", bsonx.String(string(*csOpts.FullDocument)),
+		})
+	}
+	if csOpts.MaxAwaitTime != nil {
+		aggOpts.MaxAwaitTime = csOpts.MaxAwaitTime
+	}
+	if csOpts.ResumeAfter != nil {
+		changeStreamOptions = append(changeStreamOptions, bsonx.Elem{"resumeAfter", bsonx.Document(csOpts.ResumeAfter)})
 	}
 
-	pipelineArr.Prepend(
-		bson.VC.Document(
-			bson.NewDocument(
-				bson.EC.SubDocument("$changeStream", changeStreamOptions))))
+	pipelineArr = append(pipelineArr, bsonx.Val{})
+	copy(pipelineArr[1:], pipelineArr)
+	pipelineArr[0] = bsonx.Document(bsonx.Doc{{"$changeStream", bsonx.Document(changeStreamOptions)}})
 
-	cursor, err := coll.Aggregate(ctx, pipelineArr)
+	cursor, err := coll.Aggregate(ctx, pipelineArr, aggOpts)
 	if err != nil {
 		return nil, err
 	}
 
 	cs := &changeStream{
 		pipeline: pipelineArr,
-		options:  csOpts,
+		options:  changeStreamOptions,
 		coll:     coll,
 		cursor:   cursor,
 		session:  sess,
@@ -106,19 +116,18 @@ func (cs *changeStream) Next(ctx context.Context) bool {
 		}
 	}
 
-	resumeToken := changestreamopt.ResumeAfter(cs.resumeToken).ConvertChangeStreamOption()
 	found := false
 
 	for i, opt := range cs.options {
-		if _, ok := opt.(option.OptResumeAfter); ok {
-			cs.options[i] = resumeToken
+		if opt.Key == "resumeAfter" {
+			cs.options[i] = bsonx.Elem{"resumeAfter", bsonx.Document(cs.resumeToken)}
 			found = true
 			break
 		}
 	}
 
-	if !found {
-		cs.options = append(cs.options, resumeToken)
+	if !found && cs.resumeToken != nil {
+		cs.options = append(cs.options, bsonx.Elem{"resumeAfter", bsonx.Document(cs.resumeToken)})
 	}
 
 	oldns := cs.coll.namespace()
@@ -142,21 +151,7 @@ func (cs *changeStream) Next(ctx context.Context) bool {
 
 	_, _ = killCursors.RoundTrip(ctx, ss.Description(), conn)
 
-	changeStreamOptions := bson.NewDocument()
-
-	for _, opt := range cs.options {
-		err = opt.Option(changeStreamOptions)
-		if err != nil {
-			cs.err = err
-			return false
-		}
-	}
-
-	cs.pipeline.Set(0, bson.VC.Document(
-		bson.NewDocument(
-			bson.EC.SubDocument("$changeStream", changeStreamOptions)),
-	),
-	)
+	cs.pipeline[0] = bsonx.Document(bsonx.Doc{{"$changeStream", bsonx.Document(bsonx.Doc(cs.options))}})
 
 	oldns = cs.coll.namespace()
 	aggCmd := command.Aggregate{
@@ -183,22 +178,26 @@ func (cs *changeStream) Decode(out interface{}) error {
 		return err
 	}
 
-	return bson.NewDecoder(bytes.NewReader(br)).Decode(out)
+	return bson.UnmarshalWithRegistry(cs.coll.registry, br, out)
 }
 
-func (cs *changeStream) DecodeBytes() (bson.Reader, error) {
+func (cs *changeStream) DecodeBytes() (bson.Raw, error) {
 	br, err := cs.cursor.DecodeBytes()
 	if err != nil {
 		return nil, err
 	}
 
-	id, err := br.Lookup("_id")
+	id, err := br.LookupErr("_id")
 	if err != nil {
 		_ = cs.Close(context.Background())
 		return nil, ErrMissingResumeToken
 	}
 
-	cs.resumeToken = id.Value().MutableDocument()
+	cs.resumeToken, err = bsonx.ReadDoc(id.Document())
+	if err != nil {
+		_ = cs.Close(context.Background())
+		return nil, ErrMissingResumeToken
+	}
 
 	return br, nil
 }
