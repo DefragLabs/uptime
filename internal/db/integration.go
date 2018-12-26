@@ -4,7 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
+	"time"
+
+	"github.com/defraglabs/uptime/internal/db"
 
 	"github.com/PagerDuty/go-pagerduty"
 	log "github.com/sirupsen/logrus"
@@ -36,16 +40,29 @@ type slackNotificationMsg struct {
 	Message string
 }
 
+// Send decides which integration to send notification and sends it.
+func (integration *Integration) Send(monitorURL db.MonitorURL, serviceStatus string) {
+	err := nil
+	if integration.Type == "slack" {
+		err = integration.SendSlackNotification(monitorURL, serviceStatus)
+	} else if integration.Type == "pagerduty" {
+		err = integration.SendPagerDutyEvent(monitorURL, serviceStatus)
+	}
+
+	log.Infof("Integration send failed for site %s", monitorURL.URL)
+}
+
 // SendPagerDutyEvent sends an event v2 to pagerduty
-func (integration *Integration) SendPagerDutyEvent(timestamp string) error {
+func (integration *Integration) SendPagerDutyEvent(monitorURL db.MonitorURL, serviceStatus string) error {
 	if integration.PDRoutingKey == "" {
 		log.Infof("Invalid integration. PDRoutingKey not found.")
 
 		return errors.New("invalid integration. PDRoutingKey not found")
 	}
 
+	timestamp := time.Now().string
 	payload := pagerduty.V2Payload{
-		Summary:   "Site down",
+		Summary:   fmt.Sprintf("Site %s %s", monitorURL.URL, serviceStatus),
 		Source:    "Uptime",
 		Severity:  integration.PDSeverity,
 		Timestamp: timestamp,
@@ -68,7 +85,7 @@ func (integration *Integration) SendPagerDutyEvent(timestamp string) error {
 }
 
 // SendSlackNotification sends a notification to slack using slack webhooks.
-func (integration *Integration) SendSlackNotification(monitorURL MonitorURL) error {
+func (integration *Integration) SendSlackNotification(monitorURL MonitorURL, serviceStatus string) error {
 	if integration.WebhookURL == "" {
 		log.Infof("Invalid integration. Webhook url not found for integration %s", integration.ID)
 
@@ -76,7 +93,7 @@ func (integration *Integration) SendSlackNotification(monitorURL MonitorURL) err
 	}
 	msg := slackNotificationMsg{
 		URL:     monitorURL.URL,
-		Message: "Site down",
+		Message: fmt.Sprintf("Site %s %s", monitorURL.URL, serviceStatus),
 	}
 	byte, _ := json.Marshal(msg)
 	_, err := http.Post(integration.WebhookURL, "application/json", bytes.NewBuffer(byte))
