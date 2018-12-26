@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
-	"reflect"
 	"strconv"
 	"testing"
 	"time"
@@ -265,10 +264,11 @@ func TestUpdateMonitoringURLHandler(t *testing.T) {
 	frequency := response.Data["frequency"]
 	protocol := response.Data["protocol"]
 
-	fmt.Println(unit, frequency, reflect.TypeOf(frequency), frequency == 30, protocol)
 	if unit != "second" {
 		t.Error("unit should be second after update")
-	} else if frequency != 30 {
+	} else if int(frequency.(float64)) != 30 {
+		// https://stackoverflow.com/a/22344130/2134124.
+		// The json package will assume float64 when you haven't defined anything else.
 		t.Error("frequency should be 30 after update")
 	} else if protocol != "https" {
 		t.Error("protocol should be http after update")
