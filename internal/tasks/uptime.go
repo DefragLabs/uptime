@@ -53,28 +53,29 @@ func pingURL(t time.Time) {
 		responseTimeInMillSeconds := float64(responseTime.Nanoseconds()) / 1000000
 		datastore.AddMonitorDetail(monitorURL, resp.Status, serviceStatus, timeStamp, responseTimeInMillSeconds)
 
-		if shouldNotify(monitorURL, serviceStatus) {
-			sendAlertNotification()
+		notify := shouldNotify(monitorURL, serviceStatus)
+		if notify {
+			sendAlertNotification(monitorURL, serviceStatus)
 		}
 	}
 }
 
 // shouldNotify checks if a notification has to be sent.
-func shouldNotify(monitorURL db.MonitorURL, serviceStatus string) (bool, string) {
+func shouldNotify(monitorURL db.MonitorURL, serviceStatus string) bool {
 	datastore := db.New()
 	results := datastore.GetLastNMonitoringURLStats(monitorURL.ID, 1)
 	if len(results) == 1 {
 		latestResult := results[0]
 		if latestResult.Status != serviceStatus {
 			if serviceStatus == utils.StatusUp {
-				return true, serviceStatus
+				return true
 			} else if serviceStatus == utils.StatusDown {
-				return true, serviceStatus
+				return true
 			}
 		}
 	}
 
-	return false, ""
+	return false
 }
 
 // sendAlertNotification sends a notification through all the configured integrations

@@ -8,8 +8,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/defraglabs/uptime/internal/db"
-
 	"github.com/PagerDuty/go-pagerduty"
 	log "github.com/sirupsen/logrus"
 )
@@ -41,26 +39,31 @@ type slackNotificationMsg struct {
 }
 
 // Send decides which integration to send notification and sends it.
-func (integration *Integration) Send(monitorURL db.MonitorURL, serviceStatus string) {
-	err := nil
+func (integration *Integration) Send(monitorURL MonitorURL, serviceStatus string) {
+	var err error
+
 	if integration.Type == "slack" {
 		err = integration.SendSlackNotification(monitorURL, serviceStatus)
 	} else if integration.Type == "pagerduty" {
 		err = integration.SendPagerDutyEvent(monitorURL, serviceStatus)
 	}
 
+	if err == nil {
+		log.Fatal("Unable to send integration")
+	}
+
 	log.Infof("Integration send failed for site %s", monitorURL.URL)
 }
 
 // SendPagerDutyEvent sends an event v2 to pagerduty
-func (integration *Integration) SendPagerDutyEvent(monitorURL db.MonitorURL, serviceStatus string) error {
+func (integration *Integration) SendPagerDutyEvent(monitorURL MonitorURL, serviceStatus string) error {
 	if integration.PDRoutingKey == "" {
 		log.Infof("Invalid integration. PDRoutingKey not found.")
 
 		return errors.New("invalid integration. PDRoutingKey not found")
 	}
 
-	timestamp := time.Now().string
+	timestamp := time.Now().String()
 	payload := pagerduty.V2Payload{
 		Summary:   fmt.Sprintf("Site %s %s", monitorURL.URL, serviceStatus),
 		Source:    "Uptime",
