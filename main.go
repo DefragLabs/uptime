@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/defraglabs/uptime/internal/api"
+	"github.com/defraglabs/uptime/internal/db"
 	"github.com/defraglabs/uptime/internal/tasks"
 	log "github.com/sirupsen/logrus"
 )
@@ -16,6 +17,9 @@ func main() {
 	go tasks.StartScheduler()
 
 	api.StartServer()
+	datastore := db.New()
+
+	datastore.AddIndexes()
 }
 
 func setupLogin() {

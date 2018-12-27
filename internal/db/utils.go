@@ -4,6 +4,9 @@ import (
 	"context"
 	"log"
 
+	"github.com/mongodb/mongo-go-driver/mongo"
+	"github.com/mongodb/mongo-go-driver/x/bsonx"
+
 	"github.com/mongodb/mongo-go-driver/options"
 
 	"github.com/defraglabs/uptime/internal/forms"
@@ -29,6 +32,25 @@ const (
 	// IntegrationCollection stores all the integrations configured by an user
 	IntegrationCollection = "integration"
 )
+
+// AddIndexes adds mongo indexes.
+func (datastore *Datastore) AddIndexes() {
+	dbClient := datastore.Client
+
+	addIndexesOnMonitorResultCollection(dbClient, datastore)
+}
+
+func addIndexesOnMonitorResultCollection(dbClient *mongo.Client, datastore *Datastore) {
+	monitorResultCollection := dbClient.Database(datastore.DatabaseName).Collection(MonitorResultCollection)
+
+	indexes := monitorResultCollection.Indexes()
+	indexes.CreateOne(
+		context.Background(),
+		mongo.IndexModel{
+			Keys: bsonx.Doc{{"time", bsonx.Int32(-1)}},
+		},
+	)
+}
 
 // GenerateObjectID generates a new objectid.
 func GenerateObjectID() objectid.ObjectID {
