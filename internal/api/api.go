@@ -26,6 +26,11 @@ func monitoringDetailsRoutes(router *mux.Router) {
 
 func monitoringStatsRoutes(router *mux.Router) {
 	router.HandleFunc("/monitoring-urls/{monitoringURLID}/stats", GetMonitoringURLStatsHandler).Methods("GET")
+
+	// with filters
+	router.HandleFunc("/monitoring-urls/{monitoringURLID}/stats", GetMonitoringURLStatsHandler).Queries(
+		"interval", "{interval}",
+	).Methods("GET")
 }
 
 func integrationRoutes(router *mux.Router) {

@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"log"
+	"time"
 
 	"github.com/mongodb/mongo-go-driver/mongo"
 	"github.com/mongodb/mongo-go-driver/x/bsonx"
@@ -347,6 +348,67 @@ func (datastore *Datastore) GetMonitoringURLStats(monitorURLID string) []Monitor
 		context.Background(),
 		bson.D{
 			{"monitorURLID", monitorURLID},
+		},
+	)
+
+	monitorResults := make([]MonitorResult, count)
+
+	i := 0
+	for cursor.Next(context.Background()) {
+		monitorResult := MonitorResult{}
+		err := cursor.Decode(&monitorResult)
+
+		if err != nil {
+			log.Fatal("error while parsing cursor for monitor urls result")
+		}
+
+		monitorResults[i] = monitorResult
+		i++
+	}
+
+	return monitorResults
+}
+
+// GetMonitoringURLStatsInInterval gets the stats for given monitorURLID in the given interval.
+// Example:
+//     Get url stats for monitorURL in the last 1 hour.
+func (datastore *Datastore) GetMonitoringURLStatsInInterval(monitorURLID string, value int32, unit string) []MonitorResult {
+	dbClient := datastore.Client
+	collection := dbClient.Database(datastore.DatabaseName).Collection(MonitorResultCollection)
+
+	now := time.Now()
+	currentTime := now.UTC().String()
+
+	var fromTime string
+	if unit == "hour" {
+		fromTime = now.Add(-(time.Duration(value) * time.Hour)).UTC().String()
+	} else if unit == "day" {
+		fromTime = now.Add(-(time.Duration(value) * 24 * time.Hour)).UTC().String()
+	} else if unit == "week" {
+		fromTime = now.Add(-(time.Duration(value) * 24 * 7 * time.Hour)).UTC().String()
+	} else if unit == "month" {
+		fromTime = now.Add(-(time.Duration(value) * 24 * 31 * time.Hour)).UTC().String()
+	}
+
+	count, _ := collection.Count(
+		context.Background(),
+		bson.D{
+			{"monitorURLID", monitorURLID},
+			{"time", bson.D{
+				{"$gte", fromTime},
+				{"$lte", currentTime},
+			}},
+		},
+	)
+
+	cursor, _ := collection.Find(
+		context.Background(),
+		bson.D{
+			{"monitorURLID", monitorURLID},
+			{"time", bson.D{
+				{"$gte", fromTime},
+				{"$lte", currentTime},
+			}},
 		},
 	)
 

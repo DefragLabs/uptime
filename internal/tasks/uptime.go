@@ -45,7 +45,8 @@ func pingURL(t time.Time) {
 			// Don't fail like this.
 			log.Warn("API ping failed")
 		}
-		timeStamp := t.Format(time.UnixDate)
+
+		timeStamp := currentTime.UTC().String()
 		fmt.Println(responseTime, url, resp.Status, timeStamp)
 
 		serviceStatus := utils.GetServiceStatus(resp.StatusCode)

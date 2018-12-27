@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"regexp"
+	"strconv"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -241,9 +243,40 @@ func GetMonitoringURLStatsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	monitorResults := datastore.GetMonitoringURLStats(monitoringURLID)
+	var monitorResults []db.MonitorResult
+
+	interval := r.FormValue("interval")
+	if interval != "" {
+		if !validateInterval(interval) {
+			writeErrorResponse(w, "Invalid interval format. Expecting `{value}-{unit}`")
+
+			return
+		}
+		value, unit := splitInterval(interval)
+		monitorResults = datastore.GetMonitoringURLStatsInInterval(monitoringURLID, value, unit)
+	} else {
+		monitorResults = datastore.GetMonitoringURLStats(monitoringURLID)
+	}
+
 	data := make(map[string]interface{})
 	data["monitorResults"] = monitorResults
 
 	writeSuccessStructResponse(w, data, http.StatusOK)
+}
+
+func validateInterval(interval string) bool {
+	matched, _ := regexp.MatchString("([0-9]+)-([a-z]+)", interval)
+
+	return matched
+}
+
+func splitInterval(interval string) (int32, string) {
+	r := regexp.MustCompile("(?P<value>[0-9]+)-(?P<unit>[a-z]+)")
+
+	matches := r.FindStringSubmatch(interval)
+	value, _ := strconv.Atoi(matches[1])
+
+	unit := matches[2]
+
+	return int32(value), unit
 }
