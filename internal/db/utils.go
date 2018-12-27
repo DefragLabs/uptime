@@ -4,6 +4,8 @@ import (
 	"context"
 	"log"
 
+	"github.com/mongodb/mongo-go-driver/options"
+
 	"github.com/defraglabs/uptime/internal/forms"
 	"github.com/mongodb/mongo-go-driver/bson"
 	"github.com/mongodb/mongo-go-driver/bson/objectid"
@@ -344,6 +346,43 @@ func (datastore *Datastore) GetMonitoringURLStats(monitorURLID string) []Monitor
 	return monitorResults
 }
 
+// GetLastNMonitoringURLStats gets the stats for given monitorURLID
+func (datastore *Datastore) GetLastNMonitoringURLStats(monitorURLID string, n int64) []MonitorResult {
+	dbClient := datastore.Client
+	collection := dbClient.Database(datastore.DatabaseName).Collection(MonitorResultCollection)
+
+	findOptions := options.Find()
+	findOptions.Sort = bson.D{
+		{"time", -1},
+	}
+	findOptions.Limit = &n
+
+	cursor, _ := collection.Find(
+		context.Background(),
+		bson.D{
+			{"monitorURLID", monitorURLID},
+		},
+		findOptions,
+	)
+
+	monitorResults := make([]MonitorResult, n)
+
+	i := 0
+	for cursor.Next(context.Background()) {
+		monitorResult := MonitorResult{}
+		err := cursor.Decode(&monitorResult)
+
+		if err != nil {
+			log.Fatal("error while parsing cursor for monitor urls result")
+		}
+
+		monitorResults[i] = monitorResult
+		i++
+	}
+
+	return monitorResults
+}
+
 // AddResetPassword adds password code with the user id.
 func (datastore *Datastore) AddResetPassword(resetPassword ResetPassword) interface{} {
 	dbClient := datastore.Client
@@ -394,6 +433,38 @@ func (datastore *Datastore) AddIntegration(integrationForm forms.IntegrationForm
 	return integration
 }
 
+// GetIntegrations gets all integrations.
+func (datastore *Datastore) GetIntegrations() []Integration {
+	dbClient := datastore.Client
+	collection := dbClient.Database(datastore.DatabaseName).Collection(IntegrationCollection)
+
+	count, _ := collection.Count(
+		context.Background(),
+		bson.D{},
+	)
+
+	cursor, _ := collection.Find(
+		context.Background(),
+		bson.D{},
+	)
+
+	integrations := make([]Integration, count)
+
+	i := 0
+	for cursor.Next(context.Background()) {
+		integration := Integration{}
+		err := cursor.Decode(&integration)
+		if err != nil {
+			log.Fatal("error while parsing cursor for integrations")
+		}
+
+		integrations[i] = integration
+		i++
+	}
+
+	return integrations
+}
+
 // GetIntegrationsByUserID gets all integrations added by an user
 func (datastore *Datastore) GetIntegrationsByUserID(userID string) []Integration {
 	dbClient := datastore.Client
@@ -420,7 +491,7 @@ func (datastore *Datastore) GetIntegrationsByUserID(userID string) []Integration
 		integration := Integration{}
 		err := cursor.Decode(&integration)
 		if err != nil {
-			log.Fatal("error while parsing cursor for monitor urls")
+			log.Fatal("error while parsing cursor for integrations")
 		}
 
 		integrations[i] = integration
