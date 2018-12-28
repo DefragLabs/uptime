@@ -44,6 +44,7 @@ func pingURL(t time.Time) {
 		if err != nil {
 			// Don't fail like this.
 			log.Warn("API ping failed")
+			continue
 		}
 
 		timeStamp := currentTime.UTC().String()
