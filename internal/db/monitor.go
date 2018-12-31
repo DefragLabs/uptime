@@ -6,6 +6,9 @@ type MonitorURL struct {
 
 	UserID string `bson:"userID" json:"userID" structs:"userID"`
 
+	// Name of the url
+	Name string `bson:"name" json:"name" structs:"name"`
+
 	// Http protocol (http/https)
 	Protocol string `bson:"protocol" json:"protocol" structs:"protocol"`
 

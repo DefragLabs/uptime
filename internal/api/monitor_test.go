@@ -69,6 +69,7 @@ func TestAddMonitoringURL(t *testing.T) {
 
 	monitorURLForm := forms.MonitorURLForm{
 		Protocol:  "http",
+		Name:      "example",
 		URL:       "example.com",
 		Frequency: 5,
 		Unit:      "minute",
@@ -110,6 +111,7 @@ func TestAddDuplicateMonitoringURL(t *testing.T) {
 
 	monitorURLForm := forms.MonitorURLForm{
 		Protocol:  "http",
+		Name:      "example",
 		URL:       "example.com",
 		Frequency: 5,
 		Unit:      "minute",

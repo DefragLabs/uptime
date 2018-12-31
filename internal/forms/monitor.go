@@ -11,6 +11,7 @@ import (
 type MonitorURLForm struct {
 	ID        string `bson:"_id" json:"id,omitempty"`
 	UserID    string `bson:"userID" json:"-"`
+	Name      string `bson:"name" json:"name"`
 	Protocol  string `bson:"protocol" json:"protocol"`
 	URL       string `bson:"url" json:"url"`
 	Frequency int32  `bson:"frequency" json:"frequency"`
@@ -34,7 +35,9 @@ func validateURL(url string) bool {
 
 // Validate monitor url form input
 func (monitorURLForm MonitorURLForm) Validate() string {
-	if monitorURLForm.Protocol == "" {
+	if monitorURLForm.Name == "" {
+		return "Name is required"
+	} else if monitorURLForm.Protocol == "" {
 		return "Protocol is required"
 	} else if monitorURLForm.URL == "" {
 		return "URL is required"
