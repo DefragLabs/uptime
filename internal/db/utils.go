@@ -39,6 +39,7 @@ func (datastore *Datastore) AddIndexes() {
 	dbClient := datastore.Client
 
 	addIndexesOnMonitorResultCollection(dbClient, datastore)
+	addTextIndexesOnMonitorURLCollection(dbClient, datastore)
 }
 
 func addIndexesOnMonitorResultCollection(dbClient *mongo.Client, datastore *Datastore) {
@@ -49,6 +50,18 @@ func addIndexesOnMonitorResultCollection(dbClient *mongo.Client, datastore *Data
 		context.Background(),
 		mongo.IndexModel{
 			Keys: bsonx.Doc{{"time", bsonx.Int32(-1)}},
+		},
+	)
+}
+
+func addTextIndexesOnMonitorURLCollection(dbClient *mongo.Client, datastore *Datastore) {
+	monitorURLCollection := dbClient.Database(datastore.DatabaseName).Collection(MonitorURLCollection)
+
+	indexes := monitorURLCollection.Indexes()
+	indexes.CreateOne(
+		context.Background(),
+		mongo.IndexModel{
+			Keys: bsonx.Doc{{"url", bsonx.String("text")}},
 		},
 	)
 }
