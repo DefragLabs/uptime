@@ -16,10 +16,10 @@ func init() {
 func main() {
 	go tasks.StartScheduler()
 
-	api.StartServer()
 	datastore := db.New()
-
 	datastore.AddIndexes()
+
+	api.StartServer()
 }
 
 func setupLogin() {
