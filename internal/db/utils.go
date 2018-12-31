@@ -63,7 +63,10 @@ func addTextIndexesOnMonitorURLCollection(dbClient *mongo.Client, datastore *Dat
 	indexes.CreateOne(
 		context.Background(),
 		mongo.IndexModel{
-			Keys: bsonx.Doc{{"url", bsonx.String("text")}},
+			Keys: bsonx.Doc{
+				{"url", bsonx.String("text")},
+				{"name", bsonx.String("text")},
+			},
 		},
 	)
 }
