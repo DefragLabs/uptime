@@ -2,7 +2,6 @@ package db
 
 import (
 	"context"
-	"log"
 	"time"
 
 	"github.com/mongodb/mongo-go-driver/mongo"
@@ -13,6 +12,7 @@ import (
 	"github.com/defraglabs/uptime/internal/forms"
 	"github.com/mongodb/mongo-go-driver/bson"
 	"github.com/mongodb/mongo-go-driver/bson/objectid"
+	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -40,6 +40,8 @@ func (datastore *Datastore) AddIndexes() {
 
 	addIndexesOnMonitorResultCollection(dbClient, datastore)
 	addTextIndexesOnMonitorURLCollection(dbClient, datastore)
+
+	log.Info("Added db indexes")
 }
 
 func addIndexesOnMonitorResultCollection(dbClient *mongo.Client, datastore *Datastore) {
@@ -307,6 +309,47 @@ func (datastore *Datastore) DeleteMonitoringURL(userID, monitoringURLID string) 
 			{"_id", monitoringURLID},
 		},
 	)
+}
+
+// SearchMonitoringURL searches text fields
+func (datastore *Datastore) SearchMonitoringURL(userID, searchText string) []MonitorURL {
+	dbClient := datastore.Client
+	collection := dbClient.Database(datastore.DatabaseName).Collection(MonitorURLCollection)
+
+	count, _ := collection.Count(
+		context.Background(),
+		bson.D{
+			{"userID", userID},
+			{"$text", bson.D{
+				{"$search", searchText},
+			}},
+		},
+	)
+
+	monitorURLS := make([]MonitorURL, count)
+	cursor, _ := collection.Find(
+		context.Background(),
+		bson.D{
+			{"userID", userID},
+			{"$text", bson.D{
+				{"$search", searchText},
+			}},
+		},
+	)
+
+	i := 0
+	for cursor.Next(context.Background()) {
+		monitorURL := MonitorURL{}
+		err := cursor.Decode(&monitorURL)
+		if err != nil {
+			log.Info("error while parsing cursor for monitor urls:", err)
+		}
+
+		monitorURLS[i] = monitorURL
+		i++
+	}
+
+	return monitorURLS
 }
 
 // AddMonitorDetail add monitor url detail to the db.
