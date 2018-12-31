@@ -104,7 +104,15 @@ func GetMonitoringURLsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	datastore := db.New()
-	monitoringURLS := datastore.GetMonitoringURLSByUserID(user.ID)
+
+	search := r.FormValue("search")
+
+	var monitoringURLS []db.MonitorURL
+	if search != "" {
+		monitoringURLS = datastore.SearchMonitoringURL(user.ID, search)
+	} else {
+		monitoringURLS = datastore.GetMonitoringURLSByUserID(user.ID)
+	}
 
 	data := make(map[string]interface{})
 	data["monitoringURLs"] = monitoringURLS
