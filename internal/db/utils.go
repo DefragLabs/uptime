@@ -103,6 +103,28 @@ func (datastore *Datastore) UpdateUser(user User) {
 	)
 }
 
+// UpdateUserDetail func updates user detail
+func (datastore *Datastore) UpdateUserDetail(userID string, userDetailForm forms.UserDetailForm) {
+	dbClient := datastore.Client
+	collection := dbClient.Database(datastore.DatabaseName).Collection(UsersCollection)
+
+	collection.FindOneAndUpdate(
+		context.Background(),
+		bson.D{
+			{"_id", userID},
+		},
+		bson.D{
+			{"$set", bson.D{
+				{"firstName", userDetailForm.FirstName},
+				{"lastName", userDetailForm.LastName},
+				{"email", userDetailForm.Email},
+				{"phoneNumber", userDetailForm.PhoneNumber},
+				{"companyName", userDetailForm.CompanyName},
+			}},
+		},
+	)
+}
+
 // GetUserByID from db.
 func (datastore *Datastore) GetUserByID(userID string) User {
 	dbClient := datastore.Client

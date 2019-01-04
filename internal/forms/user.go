@@ -77,3 +77,14 @@ func (resetPasswordForm ResetPasswordForm) Validate() string {
 
 	return ""
 }
+
+// UserDetailForm is used for updating user details.
+// Password cannot be updated as part of user detail update.
+type UserDetailForm struct {
+	ID          string `bson:"_id" json:"id,omitempty"`
+	FirstName   string `bson:"firstName" json:"firstName,omitempty"`
+	LastName    string `bson:"lastName" json:"lastName,omitempty"`
+	Email       string `bson:"email" json:"email,omitempty"`
+	CompanyName string `bson:"companyName" json:"companyName,omitempty"`
+	PhoneNumber string `bson:"phoneNumber" json:"phoneNumber,omitempty"`
+}

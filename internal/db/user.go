@@ -24,7 +24,7 @@ type User struct {
 	PhoneNumber  string `bson:"phoneNumber" json:"phoneNumber"`
 	CompanyName  string `bson:"CompanyName" json:"companyName"`
 	Email        string `bson:"email" json:"email"`
-	PasswordHash string `bson:"passwordHash" json:"password"`
+	PasswordHash string `bson:"passwordHash" json:"-" structs:"-"`
 }
 
 // ResetPassword struct
