@@ -227,6 +227,37 @@ func (datastore *Datastore) GetMonitoringURLByUserIDAndURL(userID, protocol, URL
 	return monitorURL
 }
 
+// GetMonitoringURLSByUserIDCount returns the count of monitoring URL's for user.
+func (datastore *Datastore) GetMonitoringURLSByUserIDCount(userID string) int64 {
+	dbClient := datastore.Client
+	collection := dbClient.Database(datastore.DatabaseName).Collection(MonitorURLCollection)
+
+	count, _ := collection.Count(
+		context.Background(),
+		bson.D{
+			{"userID", userID},
+		},
+	)
+
+	return count
+}
+
+// GetMonitoringURLSByUserIDAndStatus returns the monitoring URL's for user based on the status.
+func (datastore *Datastore) GetMonitoringURLSByUserIDAndStatus(userID, status string) int64 {
+	dbClient := datastore.Client
+	collection := dbClient.Database(datastore.DatabaseName).Collection(MonitorURLCollection)
+
+	count, _ := collection.Count(
+		context.Background(),
+		bson.D{
+			{"userID", userID},
+			{"status", status},
+		},
+	)
+
+	return count
+}
+
 // GetMonitoringURLSByUserID gets all URL's for user.
 func (datastore *Datastore) GetMonitoringURLSByUserID(userID string) []MonitorURL {
 	dbClient := datastore.Client

@@ -16,6 +16,10 @@ func authRoutes(router *mux.Router) {
 	s.HandleFunc("/reset-password", ResetPasswordHandler).Methods("POST")
 }
 
+func dashboardRoutes(router *mux.Router) {
+	router.HandleFunc("/dashboard/stats", DashboardStatsHandler).Methods("GET")
+}
+
 func monitoringDetailsRoutes(router *mux.Router) {
 	router.HandleFunc("/monitoring-urls", AddMonitoringURLHandler).Methods("POST")
 	router.HandleFunc("/monitoring-urls", GetMonitoringURLsHandler).Methods("GET")
@@ -55,6 +59,7 @@ func StartServer() {
 	monitoringStatsRoutes(router)
 	integrationRoutes(router)
 	authRoutes(router)
+	dashboardRoutes(router)
 
 	http.ListenAndServe(":8080", handlers.CORS(
 		handlers.AllowedHeaders([]string{"Content-Type", "Authorization"}),

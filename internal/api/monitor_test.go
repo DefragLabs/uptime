@@ -2,64 +2,17 @@ package api
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
-	"strconv"
 	"testing"
-	"time"
 
 	"github.com/defraglabs/uptime/internal/db"
 	"github.com/defraglabs/uptime/internal/forms"
-	"github.com/defraglabs/uptime/internal/utils"
 	"github.com/gorilla/mux"
 )
-
-// Clears monitor collection. Also clears users collection.
-// We create test user to authenticate the requests. we clear them after
-// every test.
-func clearMonitorCollection() {
-	datastore := db.New()
-
-	datastore.Client.Database(datastore.DatabaseName).Collection(
-		db.UsersCollection).Drop(context.Background())
-
-	datastore.Client.Database(datastore.DatabaseName).Collection(
-		db.MonitorURLCollection).Drop(context.Background())
-}
-
-func addTestMonitorURL(userID string) string {
-	monitorURLForm := forms.MonitorURLForm{
-		UserID:    userID,
-		Protocol:  "http",
-		URL:       "example.com",
-		Frequency: 5,
-		Unit:      "minute",
-	}
-	objectID := db.GenerateObjectID()
-	monitorURLForm.ID = objectID.Hex()
-
-	datastore := db.New()
-	monitoringURL := datastore.AddMonitoringURL(monitorURLForm)
-
-	return monitoringURL.ID
-}
-
-func addTestMonitorURLResult(userID, monitorURLID string) string {
-	datastore := db.New()
-
-	monitorURL := datastore.GetMonitoringURLByUserID(userID, monitorURLID)
-
-	status := utils.GetServiceStatus(http.StatusOK)
-	responseTime := float64(time.Duration(1*time.Second).Nanoseconds()) / 1000000
-	monitorResult := datastore.AddMonitorDetail(
-		monitorURL, strconv.Itoa(http.StatusOK), status, "100ms", responseTime)
-
-	return monitorResult.ID
-}
 
 func TestAddMonitoringURL(t *testing.T) {
 	os.Setenv("MONGO_DATABASE_NAME", "uptime_test")
