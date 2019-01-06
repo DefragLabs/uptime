@@ -12,6 +12,17 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+const (
+	// EmailIntegration represents email integration.
+	EmailIntegration = "email"
+
+	// SlackIntegration represents slack integration.
+	SlackIntegration = "slack"
+
+	// PagerDutyIntegration represents pagerduty integration.
+	PagerDutyIntegration = "pagerduty"
+)
+
 // Integration struct represents a row in db.
 type Integration struct {
 	ID     string `bson:"_id" json:"id,omitempty" structs:"id"`
