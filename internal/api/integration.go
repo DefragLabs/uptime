@@ -67,10 +67,17 @@ func GetIntegrationsHandler(w http.ResponseWriter, r *http.Request) {
 	datastore := db.New()
 	integrations := datastore.GetIntegrationsByUserID(user.ID)
 
-	data := make(map[string]interface{})
-	data["integrations"] = integrations
+	data := make(map[string][]db.Integration)
+	// data["integrations"] = integrations
+	for _, integration := range integrations {
+		if _, ok := data[integration.Type]; ok {
+			data[integration.Type] = append(data[integration.Type], integration)
+		} else {
+			data[integration.Type] = append(data[integration.Type], integration)
+		}
+	}
 
-	writeSuccessStructResponse(w, data, http.StatusOK)
+	writeSuccessSimpleResponse(w, data, http.StatusOK)
 }
 
 // GetIntegrationHandler gets a specific integration

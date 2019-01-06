@@ -1,5 +1,12 @@
 package api
 
+// SimpleResponse uses interface{} for data.
+type SimpleResponse struct {
+	Success bool              `json:"success"`
+	Data    interface{}       `json:"data"`
+	Error   map[string]string `json:"error"`
+}
+
 // Response format for api's
 type Response struct {
 	Success bool              `json:"success"`

@@ -196,7 +196,7 @@ func TestGetIntegrationsHandler(t *testing.T) {
 		t.Errorf("response success is false")
 	}
 
-	integrations := response.Data["integrations"].([]interface{})
+	integrations := response.Data["email"].([]interface{})
 	if len(integrations) != 1 {
 		t.Errorf("Expected only one integration")
 	}

@@ -41,3 +41,15 @@ func writeSuccessStructResponse(w http.ResponseWriter, data map[string]interface
 	w.WriteHeader(status)
 	json.NewEncoder(w).Encode(response)
 }
+
+func writeSuccessSimpleResponse(w http.ResponseWriter, data interface{}, status int) {
+	response := SimpleResponse{
+		Success: true,
+		Data:    data,
+		Error:   nil,
+	}
+
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(status)
+	json.NewEncoder(w).Encode(response)
+}
