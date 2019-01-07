@@ -35,9 +35,11 @@ func validateURL(url string) bool {
 
 // Validate monitor url form input
 func (monitorURLForm MonitorURLForm) Validate() string {
-	if monitorURLForm.Name == "" {
-		return "Name is required"
-	} else if monitorURLForm.Protocol == "" {
+	// TODO: Uncomment this for the next release.
+	// if monitorURLForm.Name == "" {
+	// 	return "Name is required"
+	// } else
+	if monitorURLForm.Protocol == "" {
 		return "Protocol is required"
 	} else if monitorURLForm.URL == "" {
 		return "URL is required"
