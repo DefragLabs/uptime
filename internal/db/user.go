@@ -56,11 +56,13 @@ func GetJWT(user User, password string) (string, error) {
 		hexCode := hex.EncodeToString(code.Bytes())
 
 		token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-			"userID": user.ID,
-			"email":  user.Email,
-			"exp":    time.Now().Add(time.Hour * 168).Unix(),
-			"iat":    time.Now().Unix(),
-			"jti":    hexCode,
+			"userID":    user.ID,
+			"email":     user.Email,
+			"firstName": user.FirstName,
+			"lastName":  user.LastName,
+			"exp":       time.Now().Add(time.Hour * 168).Unix(),
+			"iat":       time.Now().Unix(),
+			"jti":       hexCode,
 		})
 
 		// Sign and get the complete encoded token as a string using the secret
