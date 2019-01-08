@@ -33,3 +33,9 @@ Monitor url's configuration matrix
 | 5         | minute |
 | 15        | minute |
 | 30        | minute |
+
+## AWS SES configuration
+
+`AWS_SES_REGION`
+`AWS_SES_ACCESS_KEY`
+`AWS_SES_ACCESS_SECRET`
