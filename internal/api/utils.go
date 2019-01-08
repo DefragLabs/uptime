@@ -19,6 +19,13 @@ func writeErrorResponse(w http.ResponseWriter, errorMsg string) {
 	json.NewEncoder(w).Encode(response)
 }
 
+// This is to be used when the data has to be of the format
+// Example:
+// {
+// 	  "data": {
+// 		  "token": "abcde"
+// 	  }
+// }
 func writeSuccessResponse(w http.ResponseWriter, data map[string]string, status int) {
 	response := Response{
 		Success: true,
@@ -30,6 +37,16 @@ func writeSuccessResponse(w http.ResponseWriter, data map[string]string, status 
 	json.NewEncoder(w).Encode(response)
 }
 
+// Use this when the value is complex data structure
+// Example:
+// {
+// 	"data": {
+// 		"user": {
+// 			"firstName": "Shin",
+// 			"lastName": "Lim"
+// 		}
+// 	}
+// }
 func writeSuccessStructResponse(w http.ResponseWriter, data map[string]interface{}, status int) {
 	response := StructResponse{
 		Success: true,
@@ -42,6 +59,14 @@ func writeSuccessStructResponse(w http.ResponseWriter, data map[string]interface
 	json.NewEncoder(w).Encode(response)
 }
 
+// Use this when the data to be represented has no nested info.
+// Example:
+// {
+// 	"data": {
+// 		"firstName": "Shin",
+// 		"lastName": "Lim"
+// 	}
+// }
 func writeSuccessSimpleResponse(w http.ResponseWriter, data interface{}, status int) {
 	response := SimpleResponse{
 		Success: true,
