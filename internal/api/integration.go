@@ -68,7 +68,6 @@ func GetIntegrationsHandler(w http.ResponseWriter, r *http.Request) {
 	integrations := datastore.GetIntegrationsByUserID(user.ID)
 
 	data := make(map[string][]db.Integration)
-	// data["integrations"] = integrations
 	for _, integration := range integrations {
 		if _, ok := data[integration.Type]; ok {
 			data[integration.Type] = append(data[integration.Type], integration)

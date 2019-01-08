@@ -123,14 +123,15 @@ func TestGetMonitoringURLsHandler(t *testing.T) {
 		t.Errorf("expected status OK, got %v", res.StatusCode)
 	}
 
-	response := StructResponse{}
+	response := SimpleResponse{}
 	json.NewDecoder(res.Body).Decode(&response)
 
 	if response.Success == false {
 		t.Errorf("response success is false")
 	}
 
-	monitoringURLs := response.Data["monitoringURLs"].([]interface{})
+	monitoringURLs := response.Data.([]interface{})
+
 	if len(monitoringURLs) != 1 {
 		t.Errorf("Expected only one monitoringURL")
 	}

@@ -114,10 +114,7 @@ func GetMonitoringURLsHandler(w http.ResponseWriter, r *http.Request) {
 		monitoringURLS = datastore.GetMonitoringURLSByUserID(user.ID)
 	}
 
-	data := make(map[string]interface{})
-	data["monitoringURLs"] = monitoringURLS
-
-	writeSuccessStructResponse(w, data, http.StatusOK)
+	writeSuccessSimpleResponse(w, monitoringURLS, http.StatusOK)
 }
 
 // GetMonitoringURLHandler gets an individual monitoringURL
