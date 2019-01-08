@@ -619,11 +619,14 @@ func (datastore *Datastore) AddIntegration(integrationForm forms.IntegrationForm
 	)
 
 	integration := Integration{
-		ID:         integrationForm.ID,
-		UserID:     integrationForm.UserID,
-		Email:      integrationForm.Email,
-		Type:       integrationForm.Type,
-		WebhookURL: integrationForm.WebhookURL,
+		ID:           integrationForm.ID,
+		UserID:       integrationForm.UserID,
+		Email:        integrationForm.Email,
+		Type:         integrationForm.Type,
+		WebhookURL:   integrationForm.WebhookURL,
+		PDRoutingKey: integrationForm.PDRoutingKey,
+		PDAction:     integrationForm.PDAction,
+		PDSeverity:   integrationForm.PDSeverity,
 	}
 
 	return integration
