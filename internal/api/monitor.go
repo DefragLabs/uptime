@@ -149,6 +149,41 @@ func GetMonitoringURLHandler(w http.ResponseWriter, r *http.Request) {
 	writeSuccessStructResponse(w, responseData, http.StatusOK)
 }
 
+// MonitoringURLActionHandler lets the user to pause/resume monitoring.
+// Valid values for action query param are
+//   - pause
+//   - resume
+func MonitoringURLActionHandler(w http.ResponseWriter, r *http.Request) {
+	authToken := r.Header.Get("Authorization")
+	user, authErr := db.ValidateJWT(authToken)
+
+	if authErr != nil {
+		writeErrorResponse(w, "Authentication failed")
+
+		return
+	}
+
+	action := r.FormValue("action")
+	vars := mux.Vars(r)
+	monitoringURLID := vars["monitoringURLID"]
+
+	datastore := db.New()
+	monitoringURL := datastore.GetMonitoringURLByUserID(user.ID, monitoringURLID)
+	if monitoringURL.ID == "" {
+		writeErrorResponse(w, "Monitoring url not found")
+
+		return
+	}
+
+	actionError := forms.ValidateActions(action)
+	if actionError != "" {
+		datastore.SetMonitoringURLMonitoringStatusByUserID(user.ID, monitoringURLID, action)
+	}
+
+	responseData := structs.Map(monitoringURL)
+	writeSuccessStructResponse(w, responseData, http.StatusOK)
+}
+
 // UpdateMonitoringURLHandler api lets the user update the details.
 // Can update the following
 //   - Protocol

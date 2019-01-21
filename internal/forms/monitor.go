@@ -62,3 +62,12 @@ func (monitorURLForm MonitorURLForm) Validate() string {
 	}
 	return ""
 }
+
+// ValidateActions for monitoringURL
+func ValidateActions(action string) string {
+	if action == "pause" || action == "resume" {
+		return ""
+	}
+
+	return "Valid action values are pause and resume"
+}

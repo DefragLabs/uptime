@@ -354,6 +354,32 @@ func (datastore *Datastore) UpdateMonitoringURLByUserID(userID, monitoringURLID 
 	)
 }
 
+// SetMonitoringURLMonitoringStatusByUserID sets the monitoring status of the url.
+func (datastore *Datastore) SetMonitoringURLMonitoringStatusByUserID(userID, monitoringURLID, action string) {
+	dbClient := datastore.Client
+	collection := dbClient.Database(datastore.DatabaseName).Collection(MonitorURLCollection)
+
+	var monitoringStatus string
+	if action == "pause" {
+		monitoringStatus = MonitoringStatusPaused
+	} else if action == "resume" {
+		monitoringStatus = MonitoringStatusRunning
+	}
+
+	collection.FindOneAndUpdate(
+		context.Background(),
+		bson.D{
+			{"userID", userID},
+			{"_id", monitoringURLID},
+		},
+		bson.D{
+			{"$set", bson.D{
+				{"monitoringStatus", monitoringStatus},
+			}},
+		},
+	)
+}
+
 // DeleteMonitoringURL delete's the provided monitorURL
 func (datastore *Datastore) DeleteMonitoringURL(userID, monitoringURLID string) {
 	dbClient := datastore.Client

@@ -37,6 +37,10 @@ func monitoringDetailsRoutes(router *mux.Router) {
 	router.HandleFunc("/monitoring-urls/{monitoringURLID}", UpdateMonitoringURLHandler).Methods("PUT")
 	router.HandleFunc("/monitoring-urls/{monitoringURLID}", GetMonitoringURLHandler).Methods("GET")
 	router.HandleFunc("/monitoring-urls/{monitoringURLID}", DeleteMonitoringURLHandler).Methods("DELETE")
+
+	router.HandleFunc("/monitoring-urls/{monitoringURLID}/actions", MonitoringURLActionHandler).Queries(
+		"action", "{action}",
+	).Methods("POST")
 }
 
 func monitoringStatsRoutes(router *mux.Router) {

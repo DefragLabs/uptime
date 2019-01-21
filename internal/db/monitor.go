@@ -1,10 +1,21 @@
 package db
 
+const (
+	// MonitoringStatusPaused denotes that the url monitoring is paused.
+	MonitoringStatusPaused = "paused"
+
+	// MonitoringStatusRunning denotes that the url is being monitored
+	MonitoringStatusRunning = "running"
+)
+
 // MonitorURL struct represents a row in db.
 type MonitorURL struct {
 	ID string `bson:"_id" json:"id,omitempty" structs:"id"`
 
 	UserID string `bson:"userID" json:"userID" structs:"userID"`
+
+	// Status of the monitoring of the url. Whether paused or running
+	MonitoringStatus string `bson:"monitoringStatus" json:"monitoringStatus" structs:"monitoringStatus"`
 
 	// Name of the url
 	Name string `bson:"name" json:"name" structs:"name"`
