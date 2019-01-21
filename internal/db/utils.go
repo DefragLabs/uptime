@@ -194,6 +194,7 @@ func (datastore *Datastore) AddMonitoringURL(monitorURLForm forms.MonitorURLForm
 			URL:       monitorURLForm.URL,
 			Frequency: monitorURLForm.Frequency,
 			Unit:      monitorURLForm.Unit,
+			Name:      monitorURLForm.Name,
 		}
 	}
 
