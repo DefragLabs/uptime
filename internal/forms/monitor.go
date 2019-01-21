@@ -9,13 +9,14 @@ import (
 
 // MonitorURLForm struct represents a row in db.
 type MonitorURLForm struct {
-	ID        string `bson:"_id" json:"id,omitempty"`
-	UserID    string `bson:"userID" json:"-"`
-	Name      string `bson:"name" json:"name"`
-	Protocol  string `bson:"protocol" json:"protocol"`
-	URL       string `bson:"url" json:"url"`
-	Frequency int32  `bson:"frequency" json:"frequency"`
-	Unit      string `bson:"unit" json:"unit"`
+	ID               string `bson:"_id" json:"id,omitempty"`
+	UserID           string `bson:"userID" json:"-"`
+	MonitoringStatus string `bson:"monitoringStatus" json:"-"`
+	Name             string `bson:"name" json:"name"`
+	Protocol         string `bson:"protocol" json:"protocol"`
+	URL              string `bson:"url" json:"url"`
+	Frequency        int32  `bson:"frequency" json:"frequency"`
+	Unit             string `bson:"unit" json:"unit"`
 }
 
 func validateURL(url string) bool {
