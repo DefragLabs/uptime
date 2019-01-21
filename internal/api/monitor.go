@@ -177,9 +177,15 @@ func MonitoringURLActionHandler(w http.ResponseWriter, r *http.Request) {
 
 	actionError := forms.ValidateActions(action)
 	if actionError != "" {
-		datastore.SetMonitoringURLMonitoringStatusByUserID(user.ID, monitoringURLID, action)
+		writeErrorResponse(w, actionError)
+
+		return
 	}
 
+	datastore.SetMonitoringURLMonitoringStatusByUserID(user.ID, monitoringURLID, action)
+
+	// Get latest value from db.
+	monitoringURL = datastore.GetMonitoringURLByUserID(user.ID, monitoringURLID)
 	responseData := structs.Map(monitoringURL)
 	writeSuccessStructResponse(w, responseData, http.StatusOK)
 }
