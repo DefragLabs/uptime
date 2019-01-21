@@ -177,6 +177,7 @@ func (datastore *Datastore) GetUserByComapnyName(companyName string) User {
 func (datastore *Datastore) AddMonitoringURL(monitorURLForm forms.MonitorURLForm) MonitorURL {
 	dbClient := datastore.Client
 	collection := dbClient.Database(datastore.DatabaseName).Collection(MonitorURLCollection)
+	monitorURLForm.MonitoringStatus = MonitoringStatusRunning
 
 	_, err := collection.InsertOne(
 		context.Background(),
@@ -188,13 +189,14 @@ func (datastore *Datastore) AddMonitoringURL(monitorURLForm forms.MonitorURLForm
 		monitorURL = MonitorURL{}
 	} else {
 		monitorURL = MonitorURL{
-			ID:        monitorURLForm.ID,
-			UserID:    monitorURLForm.UserID,
-			Protocol:  monitorURLForm.Protocol,
-			URL:       monitorURLForm.URL,
-			Frequency: monitorURLForm.Frequency,
-			Unit:      monitorURLForm.Unit,
-			Name:      monitorURLForm.Name,
+			ID:               monitorURLForm.ID,
+			UserID:           monitorURLForm.UserID,
+			Protocol:         monitorURLForm.Protocol,
+			URL:              monitorURLForm.URL,
+			Frequency:        monitorURLForm.Frequency,
+			Unit:             monitorURLForm.Unit,
+			Name:             monitorURLForm.Name,
+			MonitoringStatus: MonitoringStatusRunning,
 		}
 	}
 
