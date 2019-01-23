@@ -47,24 +47,29 @@ func pingURL(t time.Time) {
 		timeStamp := currentTime.UTC().String()
 
 		var serviceStatus string
+		var statusCode string
+		var responseTimeInMillSeconds float64
+
 		if err != nil {
 			// Don't fail like this.
 			log.Warn("API ping failed")
-			serviceStatus := utils.StatusDown
-			responseTimeInMillSeconds := 0.0
-
-			datastore.AddMonitorDetail(monitorURL, "500 Server error", serviceStatus, timeStamp, responseTimeInMillSeconds)
+			serviceStatus = utils.StatusDown
+			responseTimeInMillSeconds = 0.0
+			statusCode = "500 Server error"
 		} else {
-			serviceStatus := utils.GetServiceStatus(resp.StatusCode)
+			serviceStatus = utils.GetServiceStatus(resp.StatusCode)
 
-			responseTimeInMillSeconds := float64(responseTime.Nanoseconds()) / 1000000
-			datastore.AddMonitorDetail(monitorURL, resp.Status, serviceStatus, timeStamp, responseTimeInMillSeconds)
+			responseTimeInMillSeconds = float64(responseTime.Nanoseconds()) / 1000000
+			statusCode = resp.Status
+
 		}
 
 		notify := shouldNotify(monitorURL, serviceStatus)
 		if notify {
 			sendAlertNotification(monitorURL, serviceStatus)
 		}
+
+		datastore.AddMonitorDetail(monitorURL, statusCode, serviceStatus, timeStamp, responseTimeInMillSeconds)
 	}
 }
 
