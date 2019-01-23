@@ -76,7 +76,13 @@ func initialPingMonitorURL(monitorURL db.MonitorURL, datastore *db.Datastore) {
 	start := time.Now()
 	url := fmt.Sprintf("%s://%s", monitorURL.Protocol, monitorURL.URL)
 
-	resp, err := http.Get(url)
+	timeout := time.Duration(5 * time.Second)
+	client := http.Client{
+		Timeout: timeout,
+	}
+	client.Get(url)
+
+	resp, err := client.Get(url)
 	responseTime := time.Since(start)
 	if err != nil {
 		// Don't fail like this.
