@@ -30,5 +30,9 @@ func (integrationForm IntegrationForm) Validate() string {
 		return "pagerduty routing key, action & severity are required"
 	}
 
+	if integrationForm.Type != "slack" && integrationForm.Type != "email" && integrationForm.Type != "pagerduty" {
+		return "invalid integration type. Should be slack/email/pagerduty"
+	}
+
 	return ""
 }

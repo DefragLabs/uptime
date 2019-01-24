@@ -114,11 +114,58 @@ func TestAddSlackIntegrationHandler(t *testing.T) {
 		t.Errorf("expected status CREATED, got %v", res.StatusCode)
 	}
 
-	response := Response{}
+	response := StructResponse{}
 	json.NewDecoder(res.Body).Decode(&response)
 
 	if response.Success == false {
 		t.Errorf("response success is false")
+	}
+
+	if response.Data["type"] != "slack" {
+		t.Errorf("invalid integration type")
+	}
+}
+
+func TestAddSlackWithInvalidTypeIntegrationHandler(t *testing.T) {
+	os.Setenv("MONGO_DATABASE_NAME", "uptime_test")
+	_, jwt := createTestUser()
+
+	defer clearIntegrationCollection()
+
+	integrationForm := forms.IntegrationForm{
+		Type:       "Slack",
+		WebhookURL: "http://localhost/",
+	}
+
+	byte, _ := json.Marshal(integrationForm)
+	req, err := http.NewRequest("POST", "localhost:8080/api/integrations", bytes.NewBuffer(byte))
+
+	token := fmt.Sprintf("JWT %s", jwt)
+	req.Header.Add("Authorization", token)
+
+	if err != nil {
+		t.Errorf("Unable to create a new request")
+	}
+
+	responseWriter := httptest.NewRecorder()
+	AddIntegrationHandler(responseWriter, req)
+
+	res := responseWriter.Result()
+	defer res.Body.Close()
+
+	if res.StatusCode != http.StatusBadRequest {
+		t.Errorf("expected status BAD REQUEST, got %v", res.StatusCode)
+	}
+
+	response := StructResponse{}
+	json.NewDecoder(res.Body).Decode(&response)
+
+	if response.Success == true {
+		t.Errorf("response success is true")
+	}
+
+	if response.Error["message"] != "invalid integration type. Should be slack/email/pagerduty" {
+		t.Errorf("should not be able to add integration with wrong type")
 	}
 }
 
