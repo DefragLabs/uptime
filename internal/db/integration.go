@@ -60,7 +60,7 @@ func (integration *Integration) Send(monitorURL MonitorURL, serviceStatus string
 	}
 
 	if err == nil {
-		log.Fatal("Unable to send integration")
+		log.Infof("Unable to send integration [%s] %s", integration.Type, err)
 	}
 
 	log.Infof("Integration send failed for site %s", monitorURL.URL)
