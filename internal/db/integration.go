@@ -51,19 +51,24 @@ type slackNotificationMsg struct {
 
 // Send decides which integration to send notification and sends it.
 func (integration *Integration) Send(monitorURL MonitorURL, serviceStatus string) {
-	var err error
+	log.Info("Sending alert", integration.Type)
 
+	var err error
 	if integration.Type == "slack" {
+		log.Info("Try and send slack notification")
 		err = integration.SendSlackNotification(monitorURL, serviceStatus)
 	} else if integration.Type == "pagerduty" {
 		err = integration.SendPagerDutyEvent(monitorURL, serviceStatus)
+	} else {
+		return
 	}
 
-	if err == nil {
-		log.Infof("Unable to send integration [%s] %s", integration.Type, err.Error())
+	if err != nil {
+		log.Infof("Unable to send integration [%s]", integration.Type)
+		return
 	}
 
-	log.Infof("Integration send failed for site %s", monitorURL.URL)
+	log.Infof("Integration %s sent for site %s", integration.Type, monitorURL.URL)
 }
 
 // SendPagerDutyEvent sends an event v2 to pagerduty
@@ -100,6 +105,8 @@ func (integration *Integration) SendPagerDutyEvent(monitorURL MonitorURL, servic
 
 // SendSlackNotification sends a notification to slack using slack webhooks.
 func (integration *Integration) SendSlackNotification(monitorURL MonitorURL, serviceStatus string) error {
+	log.Info("Sending slack notification.")
+
 	if integration.WebhookURL == "" {
 		log.Infof("Invalid integration. Webhook url not found for integration %s", integration.ID)
 
