@@ -94,7 +94,6 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	datastore := db.New()
 
 	user := datastore.GetUserByEmail(userLoginForm.Email)
-	fmt.Print(user, user.ID)
 	if user.ID == "" {
 		writeErrorResponse(w, "User not found")
 		return
