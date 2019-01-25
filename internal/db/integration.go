@@ -46,7 +46,7 @@ type Integration struct {
 }
 
 type slackNotificationMsg struct {
-	Text string `json:text`
+	Text string `json:"text"`
 }
 
 // Send decides which integration to send notification and sends it.
