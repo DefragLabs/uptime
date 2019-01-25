@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"time"
 
@@ -45,8 +46,7 @@ type Integration struct {
 }
 
 type slackNotificationMsg struct {
-	URL     string
-	Message string
+	text string `json:text`
 }
 
 // Send decides which integration to send notification and sends it.
@@ -112,16 +112,20 @@ func (integration *Integration) SendSlackNotification(monitorURL MonitorURL, ser
 
 		return errors.New("invalid integration. webhook url not found")
 	}
+
 	msg := slackNotificationMsg{
-		URL:     monitorURL.URL,
-		Message: fmt.Sprintf("Site %s %s", monitorURL.URL, serviceStatus),
+		text: fmt.Sprintf("Site %s %s", monitorURL.URL, serviceStatus),
 	}
 	byte, _ := json.Marshal(msg)
-	_, err := http.Post(integration.WebhookURL, "application/json", bytes.NewBuffer(byte))
+	resp, err := http.Post(integration.WebhookURL, "application/json", bytes.NewBuffer(byte))
 
 	if err != nil {
 		return errors.New("slack notification send failed")
 	}
 
+	defer resp.Body.Close()
+	body, _ := ioutil.ReadAll(resp.Body)
+
+	log.Infof("Response for slack integration for url %s is %d. Msg[%s]", monitorURL.URL, resp.StatusCode, string(body))
 	return nil
 }
