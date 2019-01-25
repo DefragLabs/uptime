@@ -348,6 +348,7 @@ func (datastore *Datastore) UpdateMonitoringURLByUserID(userID, monitoringURLID 
 		},
 		bson.D{
 			{"$set", bson.D{
+				{"name", monitorURLForm.Name},
 				{"protocol", monitorURLForm.Protocol},
 				{"frequency", monitorURLForm.Frequency},
 				{"unit", monitorURLForm.Unit},

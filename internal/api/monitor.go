@@ -198,6 +198,7 @@ func MonitoringURLActionHandler(w http.ResponseWriter, r *http.Request) {
 
 // UpdateMonitoringURLHandler api lets the user update the details.
 // Can update the following
+//   - Name
 //   - Protocol
 //   - Frequency
 //   - Unit
