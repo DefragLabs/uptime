@@ -116,8 +116,9 @@ func (integration *Integration) SendSlackNotification(monitorURL MonitorURL, ser
 	msg := slackNotificationMsg{
 		Text: fmt.Sprintf("Site %s %s", monitorURL.URL, serviceStatus),
 	}
-	byte, _ := json.Marshal(msg)
-	resp, err := http.Post(integration.WebhookURL, "application/json", bytes.NewBuffer(byte))
+	msgByte, _ := json.Marshal(msg)
+	fmt.Println("slack message", string(msgByte))
+	resp, err := http.Post(integration.WebhookURL, "application/json", bytes.NewBuffer(msgByte))
 
 	if err != nil {
 		return errors.New("slack notification send failed")
