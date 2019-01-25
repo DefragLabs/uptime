@@ -46,7 +46,7 @@ type Integration struct {
 }
 
 type slackNotificationMsg struct {
-	text string `json:text`
+	Text string `json:text`
 }
 
 // Send decides which integration to send notification and sends it.
@@ -114,7 +114,7 @@ func (integration *Integration) SendSlackNotification(monitorURL MonitorURL, ser
 	}
 
 	msg := slackNotificationMsg{
-		text: fmt.Sprintf("Site %s %s", monitorURL.URL, serviceStatus),
+		Text: fmt.Sprintf("Site %s %s", monitorURL.URL, serviceStatus),
 	}
 	byte, _ := json.Marshal(msg)
 	resp, err := http.Post(integration.WebhookURL, "application/json", bytes.NewBuffer(byte))
