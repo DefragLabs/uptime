@@ -59,6 +59,10 @@ func integrationRoutes(router *mux.Router) {
 	router.HandleFunc("/integrations/{integrationID}", DeleteIntegrationHandler).Methods("DELETE")
 }
 
+func websocketRoutes(router *mux.Router) {
+	router.HandleFunc("/echo", EchoHandler)
+}
+
 // StartServer Start the server.
 func StartServer() {
 	router := mux.NewRouter().PathPrefix("/api").Subrouter()
@@ -70,6 +74,7 @@ func StartServer() {
 	authRoutes(router)
 	userRoutes(router)
 	dashboardRoutes(router)
+	websocketRoutes(router)
 
 	http.ListenAndServe(":8080", handlers.CORS(
 		handlers.AllowedHeaders([]string{"Content-Type", "Authorization"}),
