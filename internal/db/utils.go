@@ -4,15 +4,16 @@ import (
 	"context"
 	"time"
 
-	"github.com/mongodb/mongo-go-driver/mongo"
-	"github.com/mongodb/mongo-go-driver/x/bsonx"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/x/bsonx"
 
-	"github.com/mongodb/mongo-go-driver/options"
+	"go.mongodb.org/mongo-driver/mongo/options"
 
 	"github.com/defraglabs/uptime/internal/forms"
-	"github.com/mongodb/mongo-go-driver/bson"
-	"github.com/mongodb/mongo-go-driver/bson/objectid"
+
 	log "github.com/sirupsen/logrus"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 const (
@@ -72,8 +73,8 @@ func addTextIndexesOnMonitorURLCollection(dbClient *mongo.Client, datastore *Dat
 }
 
 // GenerateObjectID generates a new objectid.
-func GenerateObjectID() objectid.ObjectID {
-	return objectid.New()
+func GenerateObjectID() primitive.ObjectID {
+	return primitive.NewObjectID()
 }
 
 // CreateUser func persists the user to db.
